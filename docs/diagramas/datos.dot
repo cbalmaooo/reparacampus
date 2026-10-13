@@ -1,0 +1,44 @@
+digraph ER {
+  rankdir=LR; bgcolor="white"; nodesep=0.45; ranksep=0.9;
+  node [shape=plain, fontname="Helvetica", fontsize=10];
+  edge [fontname="Helvetica", fontsize=9, color="#52606d", arrowhead=crow, arrowtail=tee, dir=both];
+  usuarios [label=<<table border="1" cellborder="0" cellspacing="0" cellpadding="3" color="#1e2a36">
+    <tr><td bgcolor="#1e2a36"><font color="white"><b>usuarios</b></font></td></tr>
+    <tr><td align="left">id PK</td></tr><tr><td align="left">nombre_usuario UNIQUE</td></tr>
+    <tr><td align="left">contrasena_hash</td></tr><tr><td align="left">rol CHECK (3 roles)</td></tr>
+    <tr><td align="left">activo CHECK (0,1)</td></tr></table>>];
+  incidencias [label=<<table border="1" cellborder="0" cellspacing="0" cellpadding="3" color="#c4540a">
+    <tr><td bgcolor="#c4540a"><font color="white"><b>incidencias</b></font></td></tr>
+    <tr><td align="left">id PK</td></tr><tr><td align="left">codigo UNIQUE (INC-0001)</td></tr>
+    <tr><td align="left">solicitante_id FK</td></tr><tr><td align="left">ubicacion CHECK (3)</td></tr>
+    <tr><td align="left">categoria CHECK (4)</td></tr><tr><td align="left">descripcion 20–500</td></tr>
+    <tr><td align="left">impacto, riesgo_personas</td></tr><tr><td align="left">prioridad, estado CHECK</td></tr>
+    <tr><td align="left">creada_en (UTC)</td></tr></table>>];
+  asignaciones [label=<<table border="1" cellborder="0" cellspacing="0" cellpadding="3" color="#1e2a36">
+    <tr><td bgcolor="#52606d"><font color="white"><b>asignaciones</b></font></td></tr>
+    <tr><td align="left">id PK</td></tr><tr><td align="left">incidencia_id FK UNIQUE</td></tr>
+    <tr><td align="left">coordinador_id FK</td></tr><tr><td align="left">tecnico_id FK</td></tr>
+    <tr><td align="left">asignada_en</td></tr></table>>];
+  soluciones [label=<<table border="1" cellborder="0" cellspacing="0" cellpadding="3" color="#1e2a36">
+    <tr><td bgcolor="#52606d"><font color="white"><b>soluciones</b></font></td></tr>
+    <tr><td align="left">id PK</td></tr><tr><td align="left">incidencia_id FK</td></tr>
+    <tr><td align="left">tecnico_id FK</td></tr><tr><td align="left">descripcion 20–800</td></tr>
+    <tr><td align="left">creada_en</td></tr></table>>];
+  cierres [label=<<table border="1" cellborder="0" cellspacing="0" cellpadding="3" color="#1e2a36">
+    <tr><td bgcolor="#52606d"><font color="white"><b>cierres</b></font></td></tr>
+    <tr><td align="left">id PK</td></tr><tr><td align="left">incidencia_id FK</td></tr>
+    <tr><td align="left">solicitante_id FK</td></tr><tr><td align="left">cerrada_en</td></tr></table>>];
+  eventos [label=<<table border="1" cellborder="0" cellspacing="0" cellpadding="3" color="#1e2a36">
+    <tr><td bgcolor="#52606d"><font color="white"><b>eventos</b></font></td></tr>
+    <tr><td align="left">id PK</td></tr><tr><td align="left">incidencia_id FK</td></tr>
+    <tr><td align="left">usuario_id FK (autor)</td></tr><tr><td align="left">accion CHECK (7)</td></tr>
+    <tr><td align="left">estado_anterior, estado_nuevo</td></tr><tr><td align="left">motivo 10–300 (opcional)</td></tr>
+    <tr><td align="left">solucion_id FK (opcional)</td></tr><tr><td align="left">creado_en</td></tr></table>>];
+  usuarios -> incidencias [label="registra 1:N"];
+  incidencias -> asignaciones [label="1:0..1", arrowhead=odot];
+  incidencias -> soluciones [label="1:N"];
+  incidencias -> cierres [label="1:N"];
+  incidencias -> eventos [label="1:N"];
+  usuarios -> eventos [label="realiza 1:N", style=dashed];
+  soluciones -> eventos [label="referenciada 1:0..1", style=dashed, arrowhead=odot];
+}

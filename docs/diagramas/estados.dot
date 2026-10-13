@@ -1,0 +1,14 @@
+digraph S {
+  rankdir=TB; bgcolor="white"; nodesep=0.9; ranksep=0.6;
+  node [shape=box, style="rounded,filled", fontname="Helvetica-Bold", fontsize=11, fillcolor="#ffffff", color="#1e2a36", penwidth=1.4];
+  edge [fontname="Helvetica", fontsize=9.5, color="#1e2a36"];
+  inicio [shape=circle, label="", width=0.22, style=filled, fillcolor="#1e2a36"];
+  REGISTRADA; ASIGNADA; EN_ATENCION [fillcolor="#eaf2fb"]; PENDIENTE_VALIDACION [label="PENDIENTE_\nVALIDACION", fillcolor="#fdf4e3"]; CERRADA [fillcolor="#e9f5ee"];
+  inicio -> REGISTRADA [label="registrar\n[solicitante]"];
+  REGISTRADA -> ASIGNADA [label="asignar\n[coordinador, técnico activo]"];
+  ASIGNADA -> EN_ATENCION [label="iniciar atención\n[técnico asignado]"];
+  EN_ATENCION -> PENDIENTE_VALIDACION [label="registrar solución 20–800\n[técnico asignado]"];
+  PENDIENTE_VALIDACION -> CERRADA [label="confirmar\n[solicitante dueño]\n/ crea cierre"];
+  PENDIENTE_VALIDACION -> EN_ATENCION [label="rechazar, motivo 10–300\n[solicitante dueño]\n/ mismo técnico, conserva solución", color="#c4540a", fontcolor="#9a4108"];
+  CERRADA -> EN_ATENCION [label="reabrir, motivo 10–300\n[dueño, ≤ 48 h desde el último cierre, UTC servidor]\n/ mismo técnico, conserva cierres", color="#c4540a", fontcolor="#9a4108"];
+}
