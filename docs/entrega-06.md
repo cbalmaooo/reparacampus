@@ -11,15 +11,25 @@
 - Fecha de cierre: [pendiente]
 
 ## 1. Portada
-- Universidad Simón Bolívar
-- Programa de Ingeniería de Sistemas
-- Asignatura: Ingeniería de Software I
-- Título oficial del examen y caso: [confirmar]
-- Proyecto: ReparaCampus
-- Integrantes y códigos de todos los integrantes: [completar]
-- Grupo: [pendiente]
-- Docente: [pendiente]
-- Fecha: [pendiente]
+
+**Universidad Simón Bolívar**  
+**Programa:** Ingeniería de Sistemas  
+**Asignatura:** Ingeniería de Software I  
+**Título:** Examen — Entrega 06: ReparaCampus  
+**Equipo:** Team Equihire  
+**Docente:** Adriana María Iglesias Solano  
+**Fecha de entrega:** 13 de octubre de 2026
+
+### Integrantes
+
+| Integrante | Código estudiantil |
+|---|---|
+| Alejandro Borja | 202511276804 |
+| Alejandro Barros | 202511275916 |
+| Sebastian Oyaga | 202511270424 |
+| Taliana Reyes | 2025511272254 |
+
+> **Pendiente de confirmar:** denominación oficial completa del título del examen/caso y número o código del grupo, si el aula los exige por separado.
 
 ## 2. Índice
 Generar automáticamente al maquetar el documento final. Incluir secciones, subsecciones y páginas.
