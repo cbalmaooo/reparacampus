@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block titulo %}Asignar incidencias · ReparaCampus{% endblock %}
+{% block contenido %}
+<h1>Incidencias por asignar</h1>
+<p class="ayuda">Solo aparecen las incidencias registradas. Una vez asignada, una incidencia no se puede reasignar.</p>
+
+{% if error %}<p class="error" role="alert">{{ error }}</p>{% endif %}
+
+{% if incidencias %}
+<div class="tabla-contenedor">
+<table>
+  <thead>
+    <tr><th>Código</th><th>Ubicación</th><th>Categoría</th><th>Prioridad</th><th>Registrada</th><th>Asignar a</th></tr>
+  </thead>
+  <tbody>
+  {% for inc in incidencias %}
+    <tr>
+      <td>{{ inc['codigo'] }}</td>
+      <td>{{ inc['ubicacion'] }}</td>
+      <td>{{ inc['categoria']|capitalize }}</td>
+      <td class="prioridad-{{ inc['prioridad'] }}">{{ inc['prioridad']|capitalize }}</td>
+      <td>{{ inc['creada_en'][:16]|replace('T', ' ') }} UTC</td>
+      <td>
+        <form method="post" action="{{ url_for('incidencias.asignar', codigo=inc['codigo']) }}" class="form-en-linea">
+          <label class="visualmente-oculto" for="tecnico-{{ inc['codigo'] }}">Técnico para {{ inc['codigo'] }}</label>
+          <select id="tecnico-{{ inc['codigo'] }}" name="tecnico_id" required>
+            <option value="">Técnico…</option>
+            {% for t in tecnicos %}<option value="{{ t['id'] }}">{{ t['nombre_usuario'] }}</option>{% endfor %}
+          </select>
+          <button type="submit">Asignar</button>
+        </form>
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{% else %}
+<p class="vacio">No hay incidencias pendientes de asignar.</p>
+{% endif %}
+{% endblock %}

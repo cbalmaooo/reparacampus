@@ -28,6 +28,14 @@ class ErrorPermiso(Exception):
     """El usuario de la sesión no puede ejecutar la operación."""
 
 
+class ErrorNoEncontrada(Exception):
+    """La incidencia no existe o no está permitida para el usuario."""
+
+
+class ErrorEstado(Exception):
+    """La operación no está permitida en el estado actual de la incidencia."""
+
+
 def validar_texto(valor, minimo, maximo, etiqueta):
     """Retira espacios externos y valida la longitud. Devuelve el texto recortado."""
     limpio = valor.strip() if isinstance(valor, str) else ""
