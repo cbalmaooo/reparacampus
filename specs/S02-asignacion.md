@@ -2,8 +2,8 @@
 # S02 — Priorizar y asignar una incidencia
 
 **Requisito relacionado:** RF02
-**Versión:** 0.2
-**Estado:** En revisión
+**Versión:** 1.0
+**Estado:** Aprobada
 **Autor:** cbalmaooo (v0.1)
 **Revisor:** Alejandro (MaggLo_1080)
 **Fecha:** 2026-10-13

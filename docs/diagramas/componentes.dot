@@ -1,0 +1,24 @@
+digraph G {
+  rankdir=TB; bgcolor="white"; nodesep=0.5; ranksep=0.55;
+  node [shape=box, style="rounded,filled", fontname="Helvetica", fontsize=11, fillcolor="#ffffff", color="#1e2a36", penwidth=1.3];
+  edge [fontname="Helvetica", fontsize=9.5, color="#52606d"];
+  nav [label="Navegador\n(HTML + CSS, plantillas Jinja con autoescape)", fillcolor="#eef1f4"];
+  subgraph cluster_flask {
+    label="Aplicación Flask (monolito modular)"; fontname="Helvetica-Bold"; fontsize=11; color="#c4540a"; style="rounded";
+    auth [label="auth.py\nlogin, logout, login_requerido(roles)\nidentidad y rol desde la sesión"];
+    rutas [label="rutas_incidencias.py\ntraduce HTTP ↔ servicios\n(403, 404, 409, 400)"];
+    serv [label="servicios.py\nreglas de S01–S05\npermisos, estados, transacciones", fillcolor="#fff4ec"];
+    dom [label="dominio.py\nvalidadores, prioridad,\nplazo 48 h, porcentaje"];
+    hist [label="historial.py\nregistrar_evento()"];
+    reloj [label="reloj.py\nRelojSistema (UTC) / RelojFijo"];
+    db [label="db.py\nconexión y transaccion()\nBEGIN IMMEDIATE / COMMIT / ROLLBACK"];
+  }
+  sqlite [label="SQLite (instance/reparacampus.sqlite)\nschema.sql v2: CHECK, UNIQUE, FK,\ntriggers de inmutabilidad", shape=cylinder, fillcolor="#eef1f4"];
+  nav -> auth [label="POST /login"];
+  nav -> rutas [label="GET / POST /incidencias/..."];
+  rutas -> auth [label="login_requerido", style=dashed];
+  rutas -> serv;
+  serv -> dom; serv -> hist; serv -> reloj; serv -> db; hist -> db;
+  auth -> db [style=dashed];
+  db -> sqlite;
+}
