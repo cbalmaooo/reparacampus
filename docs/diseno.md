@@ -22,3 +22,9 @@ La aplicación será un solo sistema Flask organizado en esas tres partes. Las r
 ## Decisiones pendientes de revisión
 
 El equipo debe confirmar que este diseño coincide con las SPECS revisadas antes de implementar la base de datos.
+
+## Decisión tecnológica
+
+Usaremos Flask para el servidor porque permite construir el prototipo con Python y mantener las reglas del sistema en un solo lugar. Usaremos SQLite para guardar la información en un archivo, lo que facilita ejecutar y entregar el proyecto sin instalar un servidor de base de datos.
+
+Una alternativa sería PostgreSQL, que permite manejar mejor varios usuarios trabajando al mismo tiempo, pero requiere configurar un servicio adicional. Para este prototipo académico, Flask y SQLite son suficientes y más sencillos de ejecutar. Si el sistema se usara en producción con muchos usuarios, habría que evaluar una base de datos como PostgreSQL.
