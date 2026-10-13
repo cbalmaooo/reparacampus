@@ -47,43 +47,64 @@ Generar automáticamente al maquetar el documento final. Incluir secciones, subs
 [Qué incluye la versión evaluada y qué queda fuera.]
 
 ## 4. Cinco SPECS
-Cada SPEC debe incluir historia de usuario, criterios verificables, diseño/plan, tareas, versión/estado y evidencia de revisión previa.
-### 4.1 S01 — Registro
-Fuente: [specs/S01-registro.md](../specs/S01-registro.md)
-- Historia y criterios: [resumir desde la SPEC]
-- Diseño y tareas: [completar]
-- Versión/estado: [confirmar]
-- Revisión previa: [PR, commit, comentario o acta verificable]
-- Código, pruebas y evidencia: [completar]
-### 4.2 S02 — Asignación
-Fuente: [specs/S02-asignacion.md](../specs/S02-asignacion.md)
-- Historia y criterios: [resumir desde la SPEC]
-- Diseño y tareas: [completar]
-- Versión/estado: [confirmar]
-- Revisión previa: [referencia verificable]
-- Código, pruebas y evidencia: [completar]
-### 4.3 S03 — Atención y solución
-Fuente: [specs/S03-atencion-solucion.md](../specs/S03-atencion-solucion.md)
-- Historia y criterios: [resumir desde la SPEC]
-- Diseño y tareas: [completar]
-- Versión/estado: [confirmar]
-- Revisión previa: [referencia verificable]
-- Código, pruebas y evidencia: [completar]
-### 4.4 S04 — Validación y reapertura
-Fuente: [specs/S04-validacion-reapertura.md](../specs/S04-validacion-reapertura.md)
-- Historia y criterios: [resumir desde la SPEC]
-- Diseño y tareas: [completar]
-- Versión/estado: [confirmar]
-- Revisión previa: [referencia verificable]
-- Código, pruebas y evidencia: [completar]
-### 4.5 S05 — Consultas, tablero e historial
-Fuente: [specs/S05-consultas-tablero-historial.md](../specs/S05-consultas-tablero-historial.md)
-- Historia y criterios: [resumir desde la SPEC]
-- Diseño y tareas: [completar]
-- Versión/estado: [confirmar]
-- Revisión previa: [referencia verificable]
-- Código, pruebas y evidencia: [completar]
 
+Las especificaciones fuente están en la carpeta `specs/`. Los estados que se muestran aquí corresponden a los encabezados consultados el 13 de octubre de 2026; se deben volver a comprobar al congelar la versión de entrega.
+
+### 4.1 S01 — Registrar una incidencia
+- **Requisito relacionado:** RF01 (relación con RF02 y RF05).
+- **Versión/estado en la SPEC:** 1.0 — Aprobada.
+- **Historia de usuario:** como solicitante, registrar ubicación, descripción, impacto y riesgo para que la universidad pueda priorizar y atender el daño.
+- **Alcance clave:** registro autenticado; el servidor genera código, autor, fecha UTC, estado inicial y prioridad; se registra el evento de creación.
+- **Criterios verificables:** registro válido con datos generados por servidor; campos obligatorios y valores permitidos; descripción de 20–500 caracteres; ausencia de cambios parciales si falla una validación o transacción; protección frente a datos privilegiados enviados por el cliente.
+- **Revisión declarada en la SPEC:** Alejandro Borja; historial de versiones 0.1 (borrador), 0.2 (correcciones) y 1.0 (aprobación), con fechas 12–13 de octubre de 2026.
+- **Evidencia previa:** [SPEC S01](../specs/S01-registro.md). Vincular a la revisión/PR o commit exacto cuando se confirme.
+- **Código y pruebas:** [pendiente de mapear y ejecutar contra los criterios].
+
+### 4.2 S02 — Priorizar y asignar una incidencia
+- **Requisito relacionado:** RF02.
+- **Versión/estado en la SPEC:** 0.2 — En revisión.
+- **Historia de usuario:** como coordinador, disponer de una prioridad calculada por el sistema y asignar la incidencia a un técnico activo.
+- **Reglas clave:** riesgo para personas implica prioridad CRITICA; sin riesgo, impacto ALTO implica ALTA y BAJO implica NORMAL. Solo el coordinador asigna incidencias en estado REGISTRADA a técnicos existentes, activos y con rol TECNICO. La asignación cambia el estado a ASIGNADA y registra el evento en una transacción.
+- **Criterios verificables:** comprobar las tres reglas de prioridad, asignación válida y rechazos por rol, estado o técnico inválido/inactivo, sin efectos parciales.
+- **Revisión declarada en la SPEC:** Alejandro (MaggLo_1080); el historial registra una revisión/corrección de v0.1 a v0.2 el 13 de octubre de 2026.
+- **Evidencia previa:** [SPEC S02](../specs/S02-asignacion.md). Falta adjuntar referencia verificable de la revisión y confirmar la aprobación final.
+- **Código y pruebas:** [pendiente de mapear y ejecutar contra los criterios].
+
+### 4.3 S03 — Atender una incidencia y registrar la solución
+- **Requisito relacionado:** RF03 (relación con RF04 y RF05).
+- **Versión/estado en la SPEC:** 1.0 — Aprobada.
+- **Historia de usuario:** como técnico asignado, iniciar la atención y registrar la solución para que el solicitante la revise.
+- **Reglas clave:** transición ASIGNADA → EN_ATENCION; solución de 20–800 caracteres desde EN_ATENCION; guardar la solución y pasar a PENDIENTE_VALIDACION. Las soluciones anteriores se conservan y cada transición exitosa deja un evento.
+- **Criterios verificables:** solo el técnico asignado puede operar; rechazar estados incompatibles o textos inválidos; fallos sin cambios parciales.
+- **Revisión declarada en la SPEC:** Alejandro Borja; historial 0.1, 0.2 y 1.0, con aprobación fechada 13 de octubre de 2026.
+- **Evidencia previa:** [SPEC S03](../specs/S03-atencion-solucion.md). Vincular a revisión/PR o commit exacto.
+- **Código y pruebas:** [pendiente de mapear y ejecutar contra los criterios].
+
+### 4.4 S04 — Validar o reabrir una incidencia
+- **Requisito relacionado:** RF04 (relación con RF03 y RF05).
+- **Versión/estado en la SPEC:** 1.0 — Aprobada.
+- **Historia de usuario:** como solicitante dueño de la incidencia, confirmar la solución, rechazarla con motivo o reabrir el caso dentro del plazo establecido.
+- **Reglas clave:** confirmar PENDIENTE_VALIDACION → CERRADA; rechazar PENDIENTE_VALIDACION → EN_ATENCION; reabrir CERRADA → EN_ATENCION si no han pasado más de 48 horas desde el último cierre. Rechazo y reapertura exigen motivo de 10–300 caracteres. Se conservan soluciones, cierres y eventos anteriores.
+- **Criterios verificables:** validar rol y propiedad; validar estado y motivo; comprobar el límite temporal de 48 horas; impedir modificaciones parciales cuando una operación es rechazada.
+- **Revisión declarada en la SPEC:** Alejandro Borja; historial 0.1, 0.2 y 1.0, con aprobación fechada 13 de octubre de 2026.
+- **Evidencia previa:** [SPEC S04](../specs/S04-validacion-reapertura.md). Vincular a revisión/PR o commit exacto.
+- **Código y pruebas:** [pendiente de mapear y ejecutar contra los criterios].
+
+### 4.5 S05 — Consultar incidencias, tablero e historial
+- **Requisito relacionado:** RF05; transversal a S01–S04.
+- **Versión/estado en la SPEC:** 1.0 — Aprobada.
+- **Historia de usuario:** permitir a cada rol consultar las incidencias que le corresponden y su historial; el coordinador consulta un tablero global.
+- **Reglas clave:** el solicitante ve sus propias incidencias; el técnico, las asignadas; el coordinador, todas y el tablero. Los filtros de estado y prioridad se combinan. El historial es inmutable. El tablero muestra cantidades por estado y prioridad, incidencias CRITICAS no cerradas y porcentaje de cierre con un decimal.
+- **Criterios verificables:** permisos de listado/detalle/tablero; filtros válidos; respuesta sin datos para registros ajenos; historial cronológico e inmutable; cálculo del tablero, incluidos estados/categorías con cero registros.
+- **Revisión declarada en la SPEC:** Alejandro Borja; historial 0.1, 0.2 y 1.0, con aprobación fechada 13 de octubre de 2026.
+- **Evidencia previa:** [SPEC S05](../specs/S05-consultas-tablero-historial.md). Vincular a revisión/PR o commit exacto.
+- **Código y pruebas:** [pendiente de mapear y ejecutar contra los criterios].
+
+### 4.6 Observaciones transversales
+- Las SPECS describen transacciones atómicas: un rechazo no debe dejar cambios parciales en estado, asignación, soluciones, cierres o historial.
+- Los roles y la identidad deben verificarse en el servidor; ocultar botones en la interfaz no constituye control de acceso suficiente.
+- No se considera cerrada la validación de una SPEC hasta enlazar sus criterios con código y pruebas ejecutadas.
+- La evidencia de revisión previa debe ser verificable (PR, commit, revisión registrada o acta); el historial de versiones dentro del Markdown, por sí solo, no reemplaza automáticamente esa evidencia.
 ## 5. Diseño
 ### 5.1 Componentes y arquitectura
 [Diagrama legible y explicación de responsabilidades.]
