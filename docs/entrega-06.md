@@ -133,7 +133,7 @@ Para cada intervención registrar objetivo/contexto, prompt real, salida relevan
 
 ## 7. Validación
 
-> **Corte de revisión documental:** 13 de octubre de 2026. Esta matriz se construye contrastando las SPECS, los módulos consultados y el README de la rama. No representa una ejecución reciente de pruebas. Los resultados observados deben completarse con una corrida real antes de congelar la entrega.
+> **Ejecución verificada:** GitHub Actions ejecutó `python -m pytest -v` sobre el commit de integración `2d51d8ff5ff50a4b8d87a2cf92c3ed23ea942d5a` el 13 de octubre de 2026, con Python 3.12.15 y pytest 8.3.3. Resultado: **154 pruebas aprobadas, 0 fallidas, en 18,73 segundos**. La corrida corresponde al resultado combinado de la rama de entrega y la base del PR #16; no debe describirse como una ejecución aislada de la rama documental. Evidencia: [GitHub Actions, ejecución 38473858776](https://github.com/cbalmaooo/reparacampus/actions/runs/38473858776).
 
 ### 7.1 Matriz de trazabilidad requisito → SPEC → código → prueba
 
@@ -144,70 +144,70 @@ Para cada intervención registrar objetivo/contexto, prompt real, salida relevan
 | Calcular prioridad según riesgo e impacto | S02; AC-S02-01 a AC-S02-04 | `app/dominio.py`: `calcular_prioridad()`; `app/servicios.py`: llamada desde `registrar_incidencia()` | `tests/test_dominio.py`: `test_prioridad` (cuatro combinaciones parametrizadas) y `test_prioridad_impacto_invalido` | Código y pruebas unitarias identificados; falta ejecución de la versión actual |
 | Asignar solo como coordinador a un técnico existente, activo, en incidencia REGISTRADA | S02; criterios de permiso, estado y técnico activo | `app/rutas_incidencias.py`: `asignar()`; `app/servicios.py`: `asignar_incidencia()`, `listar_tecnicos_activos()` | `tests/test_auth.py`: `test_rol_no_permitido_recibe_403`, `test_tecnico_inactivo_no_inicia_sesion`; `tests/test_schema.py`: `test_reasignacion_bloqueada_por_la_base` (restricción de persistencia, no sustituye el flujo) | Parcial: faltan pruebas directas de la operación de asignación y sus rechazos |
 | Cambiar a ASIGNADA y registrar evento sin cambios parciales | S02; criterio de atomicidad | `app/servicios.py`: `asignar_incidencia()`; `app/db.py`: `transaccion()`; `app/historial.py` | No se ha confirmado en esta revisión una prueba ejecutada que compruebe conjuntamente estado, asignación y evento | Pendiente de evidencia de prueba |
-| Iniciar atención y registrar solución de 20–800 caracteres | S03; AC-S03-* | `app/dominio.py` contiene `validar_solucion()`; no se ha identificado servicio/ruta S03 en el código consultado | `tests/test_dominio.py`: `test_solucion_limites` cubre solo la regla pura | Parcial en dominio; flujo funcional pendiente según README |
-| Confirmar, rechazar o reabrir; motivo de 10–300 caracteres y plazo máximo de 48 h | S04; AC-S04-* | `app/dominio.py`: `validar_motivo()`, `dentro_de_plazo_reapertura()`; no se ha identificado servicio/ruta S04 en el código consultado | `tests/test_dominio.py` cubre límites del motivo y regla temporal; no demuestra el flujo persistente | Parcial en dominio; flujo funcional pendiente según README |
+| Iniciar atención y registrar solución de 20–800 caracteres | S03; AC-S03-01 a AC-S03-13 | `app/rutas_incidencias.py`: rutas de inicio/solución; `app/servicios.py`: `iniciar_atencion()`, `registrar_solucion()` y `listar_asignaciones_de()` | `tests/test_s03_atencion.py`; `tests/test_integracion.py`: `test_int_01_flujo_de_cierre`, `test_int_02_rechazo_y_nueva_solucion`, `test_int_03_cierre_reapertura_y_nuevo_cierre` | Implementación y pruebas presentes en el commit de integración; suite aprobada |
+| Confirmar, rechazar o reabrir; motivo de 10–300 caracteres y plazo máximo de 48 h | S04; AC-S04-01 a AC-S04-14 | `app/rutas_incidencias.py`: rutas de confirmar/rechazar/reabrir; `app/servicios.py`: `confirmar_solucion()`, `rechazar_solucion()`, `reabrir_incidencia()` y `listar_reportes_de()` | `tests/test_s04_validacion.py` y `tests/test_integracion.py` | Implementación y pruebas presentes en el commit de integración; suite aprobada |
 | Autenticación, hash de contraseñas y cierre de sesión | S05; AC-S05-01 y AC-S05-02 | `app/auth.py`; `app/__init__.py`; `database/seed.sql` | `tests/test_auth.py`: `test_login_correcto_y_vista_de_rol`, `test_logout_invalida_la_sesion`, `test_contrasena_incorrecta_no_crea_sesion`, `test_usuario_inexistente_mismo_mensaje`, `test_cuenta_desactivada_pierde_la_sesion`; `tests/test_seed.py`: `test_contrasena_en_hash_y_verificable`; `tests/test_schema.py`: `test_seed_cinco_cuentas_con_hash` | Casos identificados en archivos; falta ejecución de la versión actual |
-| Listado por rol, detalle, filtros combinados, tablero e historial completo | S05; AC-S05-03 a AC-S05-18 | No se identificaron rutas/servicios de consulta, tablero ni detalle en los módulos consultados | No se confirmó evidencia de integración para estas consultas | Pendiente de implementación/verificación según README |
+| Listado por rol, detalle, filtros combinados, tablero e historial completo | S05; AC-S05-03 a AC-S05-18 | `app/rutas_incidencias.py`: listado, detalle, historial y tablero; `app/servicios.py`: `listar_incidencias()`, `obtener_detalle()`, `calcular_tablero()` | `tests/test_s05_consultas.py`; `tests/test_integracion.py` | Implementación y pruebas presentes en el commit de integración; suite aprobada |
 | Historial inmutable y ausencia de eventos en operaciones rechazadas | S05; AC-S05-10 a AC-S05-12 | `app/historial.py`, `database/schema.sql` | `tests/test_schema.py`: `test_historial_y_cierres_inmutables` y `test_accion_de_evento_no_permitida` prueban restricciones de base; falta verificar ausencia de evento tras rechazos de los flujos completos | Parcial: hay pruebas de restricciones SQL; falta prueba integrada de rechazo sin evento |
 
-**Lectura de la matriz:** “código identificado” no significa que el requisito esté aprobado ni que haya pasado una prueba. Las reglas puras de S03/S04 están presentes, pero no sustituyen los flujos completos de servicio, rutas, persistencia y permisos. El README consultado declara S03–S05 e INT-01 a INT-03 pendientes; actualizar esa declaración solo después de verificar la implementación real.
+**Lectura de la matriz:** la ejecución de integración confirma que la suite actual de la versión combinada pasó. La revisión funcional se documenta con los nombres de pruebas reales. El README de la base del PR también declara S01–S05 y las tres pruebas de integración implementadas; la limitación conocida indicada allí es la ausencia de token CSRF en los formularios.
 
 ### 7.2 Matriz SPEC → artefactos de implementación
 
-| SPEC | Artefactos de implementación consultados | Pruebas localizadas | Brecha principal antes de marcar “cumplida” |
+| SPEC | Artefactos de implementación consultados | Pruebas localizadas en el commit de integración | Resultado de la suite |
 |---|---|---|---|
-| S01 — Registro | `app/rutas_incidencias.py`, `app/servicios.py`, `app/dominio.py`, `app/historial.py`, `app/db.py`, `database/schema.sql` | `tests/test_dominio.py`, `tests/test_auth.py` | Ejecutar y citar pruebas de ruta/servicio, datos persistidos y rollback ante error |
-| S02 — Asignación | `app/rutas_incidencias.py`, `app/servicios.py`, `app/db.py`, `app/historial.py`, `database/schema.sql` | `tests/test_dominio.py`, `tests/test_auth.py` | Probar coordinador, estado no permitido, técnico inexistente/inactivo y consistencia estado-asignación-evento |
-| S03 — Atención/solución | `app/dominio.py` (validación de solución); servicio/ruta no identificados en esta revisión | `tests/test_dominio.py` (`test_solucion_limites`) | Implementar/verificar inicio de atención y persistencia de soluciones/eventos |
-| S04 — Validación/reapertura | `app/dominio.py` (motivo y ventana de 48 h); servicio/ruta no identificados en esta revisión | `tests/test_dominio.py` (motivo/plazo) | Implementar/verificar confirmar, rechazar, reabrir, propiedad del solicitante, último cierre y transacciones |
-| S05 — Consultas/tablero/historial | `app/auth.py`, `app/historial.py`, `database/schema.sql` | `tests/test_auth.py`; pruebas de consulta no identificadas | Implementar/verificar listado, detalle, filtros, tablero, permisos por registro e inmutabilidad |
+| S01 — Registro | `app/rutas_incidencias.py`, `app/servicios.py`, `app/dominio.py`, `app/historial.py`, `app/db.py`, `database/schema.sql` | `tests/test_s01_registro.py`, `tests/test_dominio.py`, `tests/test_schema.py` | Aprobadas en la suite de 154 pruebas |
+| S02 — Asignación | `app/rutas_incidencias.py`, `app/servicios.py`, `app/db.py`, `app/historial.py`, `database/schema.sql` | `tests/test_s02_asignacion.py`, `tests/test_schema.py` | Aprobadas en la suite de 154 pruebas |
+| S03 — Atención/solución | `app/rutas_incidencias.py`, `app/servicios.py`, `app/dominio.py`, `app/historial.py` | `tests/test_s03_atencion.py`, `tests/test_integracion.py` | Aprobadas en la suite de 154 pruebas |
+| S04 — Validación/reapertura | `app/rutas_incidencias.py`, `app/servicios.py`, `app/dominio.py`, `app/historial.py`, tablas de cierres y eventos | `tests/test_s04_validacion.py`, `tests/test_integracion.py` | Aprobadas en la suite de 154 pruebas |
+| S05 — Consultas/tablero/historial | `app/rutas_incidencias.py`, `app/servicios.py`, `app/auth.py`, `app/historial.py`, `database/schema.sql` | `tests/test_s05_consultas.py`, `tests/test_auth.py`, `tests/test_seed.py`, `tests/test_schema.py` | Aprobadas en la suite de 154 pruebas |
 
+**Alcance de la afirmación:** el resultado acredita que los tests incluidos en el commit de integración pasaron en ese entorno. No equivale por sí solo a una prueba de aceptación manual de cada pantalla ni sustituye la comprobación de la versión final etiquetada.
 ### 7.3 Casos automatizados: entradas, esperado y observado
 
-Los casos siguientes son una **lista mínima de validación propuesta**, no resultados afirmados. Tras ejecutar `python -m pytest -v`, reemplazar “Pendiente de ejecutar” por el resultado observado, añadir el identificador/nombre real de la prueba y guardar la salida íntegra en `docs/evidencias/`.
+Los diez casos representativos siguientes se vinculan con pruebas reales de la suite ejecutada. Los nombres entre comillas corresponden a pruebas parametrizadas cuando aplica.
 
-| ID | Entrada / condición | Resultado esperado | Resultado observado | Estado |
+| ID | Entrada / condición | Resultado esperado | Prueba ejecutada | Resultado observado |
 |---|---|---|---|---|
-| UT-01 | Descripción de 20 caracteres | Aceptada tras recortar espacios | Pendiente de ejecutar | Pendiente |
-| UT-02 | Descripción de 19 caracteres | Rechazada por longitud; sin persistencia | Pendiente de ejecutar | Pendiente |
-| UT-03 | Riesgo=true e impacto=BAJO | Prioridad CRITICA | Pendiente de ejecutar | Pendiente |
-| UT-04 | Riesgo=false e impacto=ALTO | Prioridad ALTA | Pendiente de ejecutar | Pendiente |
-| UT-05 | Técnico intenta iniciar sesión con cuenta inactiva | Acceso rechazado | Pendiente de ejecutar | Pendiente |
-| UT-06 | Asignación por usuario distinto de COORDINADOR | Rechazo 403; ningún cambio | Pendiente de ejecutar | Pendiente; comprobar prueba específica |
-| UT-07 | Solución con 19 caracteres | Regla de dominio la rechaza | Pendiente de ejecutar | Pendiente |
-| UT-08 | Motivo con 9 caracteres | Regla de dominio lo rechaza | Pendiente de ejecutar | Pendiente |
-| UT-09 | Reapertura exactamente a las 48 horas | Regla temporal la acepta | Pendiente de ejecutar | Pendiente |
-| UT-10 | Porcentaje de cierre con total cero | “0,0 %” | Pendiente de ejecutar | Pendiente |
+| UT-01 | Descripción de 20 caracteres | Aceptada tras recortar espacios | `tests/test_s01_registro.py::test_limites_de_descripcion[20-True]` | PASÓ |
+| UT-02 | Descripción de 19 caracteres | Rechazada por longitud | `tests/test_s01_registro.py::test_limites_de_descripcion[19-False]` | PASÓ |
+| UT-03 | Riesgo=true e impacto=BAJO | Prioridad CRITICA | `tests/test_dominio.py::test_prioridad[True-BAJO-CRITICA]` | PASÓ |
+| UT-04 | Riesgo=false e impacto=ALTO | Prioridad ALTA | `tests/test_dominio.py::test_prioridad[False-ALTO-ALTA]` | PASÓ |
+| UT-05 | Técnico con cuenta inactiva intenta iniciar sesión | Acceso rechazado | `tests/test_auth.py::test_tecnico_inactivo_no_inicia_sesion` | PASÓ |
+| UT-06 | Solicitante intenta asignar una incidencia | Rechazo por rol; no cambia la incidencia | `tests/test_s02_asignacion.py::test_rol_sin_permiso[solicitante1]` | PASÓ |
+| UT-07 | Solución de 19 caracteres | Rechazada; no se registra solución nueva | `tests/test_s03_atencion.py::test_limites_de_solucion[19-False-La solución debe tener al menos 20 caracteres]` | PASÓ |
+| UT-08 | Motivo de rechazo de 9 caracteres | Rechazado; no se agrega evento | `tests/test_s04_validacion.py::test_limites_motivo_rechazo[9-False]` | PASÓ |
+| UT-09 | Reapertura exactamente a las 48 horas | Aceptada | `tests/test_s04_validacion.py::test_reabrir_exactamente_a_las_48_horas` | PASÓ |
+| UT-10 | Tablero sin incidencias | Porcentaje de cierre “0,0 %” | `tests/test_s05_consultas.py::test_tablero_vacio` | PASÓ |
 
-### 7.4 Pruebas de integración requeridas
+### 7.4 Pruebas de integración ejecutadas
 
-Las tres pruebas de integración siguientes deben recorrer rutas y base de datos real de prueba (SQLite temporal); probar funciones puras por separado no basta.
+Las tres pruebas de integración que aparecen en el registro de GitHub Actions usan escenarios de flujo de atención y validación de incidencias. La suite informa que las tres pasaron.
 
-| ID | Flujo integrado | Preparación y acción | Resultado esperado | Resultado observado |
-|---|---|---|---|---|
-| INT-01 | S01: registro | Iniciar sesión como solicitante y enviar formulario válido; consultar incidencia y eventos en la base de prueba | Se crea una incidencia con código/autor/fecha/estado/prioridad definidos por el servidor y un evento REGISTRAR; datos y evento quedan juntos | Pendiente de ejecutar |
-| INT-02 | S02: asignación | Crear incidencia REGISTRADA; iniciar sesión como coordinador y asignar un técnico activo | Estado ASIGNADA, registro de asignación y evento ASIGNAR; intento inválido no deja cambios | Pendiente de ejecutar |
-| INT-03 | Transacción/seguridad | Intentar una operación no autorizada o provocar fallo controlado dentro de una operación de escritura | Respuesta de rechazo; estado, asignación, soluciones/cierres y eventos conservan su estado previo | Pendiente de ejecutar; elegir y documentar el fallo controlado sin alterar datos reales |
+| ID | Flujo integrado | Prueba ejecutada | Resultado observado |
+|---|---|---|---|
+| INT-01 | Atención y cierre de una incidencia | `tests/test_integracion.py::test_int_01_flujo_de_cierre` | PASÓ |
+| INT-02 | Rechazo de solución y registro de una nueva solución | `tests/test_integracion.py::test_int_02_rechazo_y_nueva_solucion` | PASÓ |
+| INT-03 | Cierre, reapertura y nuevo cierre | `tests/test_integracion.py::test_int_03_cierre_reapertura_y_nuevo_cierre` | PASÓ |
 
 ### 7.5 Ejecución, hallazgos y regresión
 
-**Evidencia histórica encontrada en el repositorio:** `docs/evidencias/pytest-2026-10-13.txt` registra `31 passed in 6.54s`, con Python 3.13.15 y pytest 8.3.3 en Windows. Sin embargo, la lista de pruebas de esa salida no incluye `tests/test_auth.py`, aunque ese archivo existe en la rama consultada. El archivo tampoco indica el SHA probado. Por estas dos razones, se conserva como evidencia histórica y no se atribuye a la versión actual de esta rama.
+**Evidencia de ejecución actual disponible:** la corrida de GitHub Actions [38473858776](https://github.com/cbalmaooo/reparacampus/actions/runs/38473858776) terminó con conclusión `success`. El log indica:
 
-Registrar la ejecución final con estos datos:
-- **Comando:** `python -m pytest -v`
-- **Fecha y entorno:** [completar con datos de la corrida real].
-- **Resultado:** [número de pruebas aprobadas/fallidas/omitidas; no inferirlo del historial].
-- **Evidencia versionada:** `docs/evidencias/pytest-AAAA-MM-DD.txt`.
-- **Commit/SHA probado:** [SHA exacto del código ejecutado].
-- **Hallazgos y correcciones:** [ID, descripción, cambio/commit y nueva prueba].
-- **Regresión:** volver a ejecutar la suite completa después de cada corrección y conservar la salida final. Comparar contra la corrida anterior e indicar pruebas añadidas, corregidas o que dejaron de pasar.
+- **Comando:** `python -m pytest -v`.
+- **Entorno:** Ubuntu 24.04.5, Python 3.12.15, pytest 8.3.3.
+- **Commit de integración probado:** `2d51d8ff5ff50a4b8d87a2cf92c3ed23ea942d5a`.
+- **Resultado:** 154 pruebas aprobadas en 18,73 segundos; no se reportaron fallos.
+- **Integración:** las pruebas INT-01, INT-02 e INT-03 pasaron.
+- **Regresión:** la suite completa se ejecutó en esa versión integrada. Repetirla después de cualquier corrección y en el SHA exacto que se etiquete como versión de entrega.
 
+**Evidencia histórica:** `docs/evidencias/pytest-2026-10-13.txt` registra una corrida previa de 31 pruebas en Windows. Se conserva como antecedente, no como evidencia principal de la ejecución actual.
 
 ### 7.6 Ejecución automática en GitHub Actions
 
 Se añadió el flujo `.github/workflows/tests.yml` en esta rama para ejecutar `python -m pytest -v` con Python 3.12 al actualizar la rama de trabajo o abrir/actualizar un pull request hacia `main`. Enlace: [flujo de pruebas](.github/workflows/tests.yml).
 
-**Estado del flujo:** pendiente de confirmar el resultado en la pestaña Actions o en los checks del [pull request #16](https://github.com/cbalmaooo/reparacampus/pull/16). La existencia del archivo de configuración no demuestra que la suite haya pasado; registrar el enlace de la corrida y su resultado cuando GitHub la reporte.
+**Resultado verificado:** [ejecución 38473858776](https://github.com/cbalmaooo/reparacampus/actions/runs/38473858776) — `success`, 154 pruebas aprobadas. El commit de integración evaluado fue `2d51d8ff5ff50a4b8d87a2cf92c3ed23ea942d5a`. Antes de la entrega final, volver a ejecutar la suite contra el SHA etiquetado como `release-examen`.
 
 ## 8. Riesgos
 Documentar cuatro riesgos concretos, causas, impactos, controles verificables, responsables y evidencias.
