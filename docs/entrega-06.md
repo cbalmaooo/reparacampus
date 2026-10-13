@@ -132,35 +132,73 @@ Para cada intervención registrar objetivo/contexto, prompt real, salida relevan
 [Para cada funcionalidad: archivos/rutas, comportamiento, decisión humana, pruebas ejecutadas y evidencia. No declarar cumplimiento sin validación.]
 
 ## 7. Validación
-### 7.1 Matriz de trazabilidad
-| Requisito/criterio | SPEC | Archivo/componente | Prueba | Evidencia | Estado |
-|---|---|---|---|---|---|
-| [Completar desde los requisitos reales] | | | | | Pendiente |
-### 7.2 Matriz SPEC/código
-| SPEC | Criterio de aceptación | Código relacionado | Prueba | Resultado verificado |
+
+> **Corte de revisión documental:** 13 de octubre de 2026. Esta matriz se construye contrastando las SPECS, los módulos consultados y el README de la rama. No representa una ejecución reciente de pruebas. Los resultados observados deben completarse con una corrida real antes de congelar la entrega.
+
+### 7.1 Matriz de trazabilidad requisito → SPEC → código → prueba
+
+| Requisito / comportamiento | SPEC y criterio relacionado | Código identificado en la rama | Prueba/evidencia localizada | Estado de trazabilidad |
 |---|---|---|---|---|
-| S01 | [Completar] | | | Pendiente |
-| S02 | [Completar] | | | Pendiente |
-| S03 | [Completar] | | | Pendiente |
-| S04 | [Completar] | | | Pendiente |
-| S05 | [Completar] | | | Pendiente |
-### 7.3 Diez pruebas automatizadas
-Registrar diez casos reales y reproducibles, con datos, esperado y observado.
-| ID | Escenario/datos | Resultado esperado | Resultado observado | Evidencia |
+| Registrar incidencia con sesión de solicitante y campos permitidos | S01; AC-S01-01 a AC-S01-11 | `app/rutas_incidencias.py`: `crear()`; `app/servicios.py`: `registrar_incidencia()`; `app/dominio.py`: validadores | `tests/test_dominio.py` (descripción y opciones); `tests/test_auth.py` (sesión requerida). Falta confirmar prueba de servicio/ruta con nombre exacto | Parcial: código identificado; falta vincular ejecución de flujo completo |
+| Generar código, autor, fecha, estado inicial, prioridad y evento en una transacción | S01; criterios de persistencia y atomicidad | `app/servicios.py`: `registrar_incidencia()`; `app/historial.py`: `registrar_evento()`; `app/db.py`: `transaccion()` | `tests/test_dominio.py` solo cubre reglas puras; la prueba transaccional debe identificarse y ejecutarse | Parcial |
+| Calcular prioridad según riesgo e impacto | S02; AC-S02-01 a AC-S02-04 | `app/dominio.py`: `calcular_prioridad()`; `app/servicios.py`: llamada desde `registrar_incidencia()` | `tests/test_dominio.py`: `test_prioridad` y `test_prioridad_impacto_invalido` | Código y pruebas unitarias identificados; resultado de ejecución pendiente |
+| Asignar solo como coordinador a un técnico existente, activo, en incidencia REGISTRADA | S02; criterios de permiso, estado y técnico activo | `app/rutas_incidencias.py`: `asignar()`; `app/servicios.py`: `asignar_incidencia()`, `listar_tecnicos_activos()` | `tests/test_auth.py` comprueba el mecanismo general de rol y técnico inactivo al iniciar sesión; falta vincular pruebas específicas de asignación | Parcial: código identificado; pruebas de flujo por verificar |
+| Cambiar a ASIGNADA y registrar evento sin cambios parciales | S02; criterio de atomicidad | `app/servicios.py`: `asignar_incidencia()`; `app/db.py`: `transaccion()`; `app/historial.py` | No se ha confirmado en esta revisión una prueba ejecutada que compruebe conjuntamente estado, asignación y evento | Pendiente de evidencia de prueba |
+| Iniciar atención y registrar solución de 20–800 caracteres | S03; AC-S03-* | `app/dominio.py` contiene `validar_solucion()`; no se ha identificado servicio/ruta S03 en el código consultado | `tests/test_dominio.py`: `test_solucion_limites` cubre solo la regla pura | Parcial en dominio; flujo funcional pendiente según README |
+| Confirmar, rechazar o reabrir; motivo de 10–300 caracteres y plazo máximo de 48 h | S04; AC-S04-* | `app/dominio.py`: `validar_motivo()`, `dentro_de_plazo_reapertura()`; no se ha identificado servicio/ruta S04 en el código consultado | `tests/test_dominio.py` cubre límites del motivo y regla temporal; no demuestra el flujo persistente | Parcial en dominio; flujo funcional pendiente según README |
+| Autenticación, hash de contraseñas y cierre de sesión | S05; AC-S05-01 y AC-S05-02 | `app/auth.py`; `app/__init__.py`; `database/seed.sql` | `tests/test_auth.py`: inicio/cierre de sesión, credenciales incorrectas, usuario inexistente, cuenta inactiva y control de rol | Código y casos de prueba identificados; falta registrar corrida |
+| Listado por rol, detalle, filtros combinados, tablero e historial completo | S05; AC-S05-03 a AC-S05-18 | No se identificaron rutas/servicios de consulta, tablero ni detalle en los módulos consultados | No se confirmó evidencia de integración para estas consultas | Pendiente de implementación/verificación según README |
+| Historial inmutable y ausencia de eventos en operaciones rechazadas | S05; AC-S05-10 a AC-S05-12 | `app/historial.py`, `database/schema.sql` (triggers por verificar en la prueba) | Falta prueba de integración que intente modificar/eliminar historial y compruebe rechazo | Pendiente de evidencia ejecutada |
+
+**Lectura de la matriz:** “código identificado” no significa que el requisito esté aprobado ni que haya pasado una prueba. Las reglas puras de S03/S04 están presentes, pero no sustituyen los flujos completos de servicio, rutas, persistencia y permisos. El README consultado declara S03–S05 e INT-01 a INT-03 pendientes; actualizar esa declaración solo después de verificar la implementación real.
+
+### 7.2 Matriz SPEC → artefactos de implementación
+
+| SPEC | Artefactos de implementación consultados | Pruebas localizadas | Brecha principal antes de marcar “cumplida” |
+|---|---|---|---|
+| S01 — Registro | `app/rutas_incidencias.py`, `app/servicios.py`, `app/dominio.py`, `app/historial.py`, `app/db.py`, `database/schema.sql` | `tests/test_dominio.py`, `tests/test_auth.py` | Ejecutar y citar pruebas de ruta/servicio, datos persistidos y rollback ante error |
+| S02 — Asignación | `app/rutas_incidencias.py`, `app/servicios.py`, `app/db.py`, `app/historial.py`, `database/schema.sql` | `tests/test_dominio.py`, `tests/test_auth.py` | Probar coordinador, estado no permitido, técnico inexistente/inactivo y consistencia estado-asignación-evento |
+| S03 — Atención/solución | `app/dominio.py` (validación de solución); servicio/ruta no identificados en esta revisión | `tests/test_dominio.py` (`test_solucion_limites`) | Implementar/verificar inicio de atención y persistencia de soluciones/eventos |
+| S04 — Validación/reapertura | `app/dominio.py` (motivo y ventana de 48 h); servicio/ruta no identificados en esta revisión | `tests/test_dominio.py` (motivo/plazo) | Implementar/verificar confirmar, rechazar, reabrir, propiedad del solicitante, último cierre y transacciones |
+| S05 — Consultas/tablero/historial | `app/auth.py`, `app/historial.py`, `database/schema.sql` | `tests/test_auth.py`; pruebas de consulta no identificadas | Implementar/verificar listado, detalle, filtros, tablero, permisos por registro e inmutabilidad |
+
+### 7.3 Casos automatizados: entradas, esperado y observado
+
+Los casos siguientes son una **lista mínima de validación propuesta**, no resultados afirmados. Tras ejecutar `python -m pytest -v`, reemplazar “Pendiente de ejecutar” por el resultado observado, añadir el identificador/nombre real de la prueba y guardar la salida íntegra en `docs/evidencias/`.
+
+| ID | Entrada / condición | Resultado esperado | Resultado observado | Estado |
 |---|---|---|---|---|
-| T01–T10 | [Completar una fila por caso] | | | |
-### 7.4 Tres pruebas de integración
-| ID | Componentes | Preparación/datos | Esperado | Observado | Evidencia |
-|---|---|---|---|---|---|
-| I01–I03 | [Completar una fila por prueba] | | | | |
-### 7.5 Hallazgos, correcciones y regresión
-[Defectos, impacto, corrección, commit y pruebas de regresión ejecutadas.]
-### 7.6 Resumen de ejecución
-- Comando: [registrar]
-- Entorno/versiones: [registrar]
-- Fecha: [registrar]
-- Ejecutadas/aprobadas/fallidas/omitidas: [solo tras ejecutar]
-- Archivo de salida: [ruta bajo docs/evidencias/]
+| UT-01 | Descripción de 20 caracteres | Aceptada tras recortar espacios | Pendiente de ejecutar | Pendiente |
+| UT-02 | Descripción de 19 caracteres | Rechazada por longitud; sin persistencia | Pendiente de ejecutar | Pendiente |
+| UT-03 | Riesgo=true e impacto=BAJO | Prioridad CRITICA | Pendiente de ejecutar | Pendiente |
+| UT-04 | Riesgo=false e impacto=ALTO | Prioridad ALTA | Pendiente de ejecutar | Pendiente |
+| UT-05 | Técnico intenta iniciar sesión con cuenta inactiva | Acceso rechazado | Pendiente de ejecutar | Pendiente |
+| UT-06 | Asignación por usuario distinto de COORDINADOR | Rechazo 403; ningún cambio | Pendiente de ejecutar | Pendiente; comprobar prueba específica |
+| UT-07 | Solución con 19 caracteres | Regla de dominio la rechaza | Pendiente de ejecutar | Pendiente |
+| UT-08 | Motivo con 9 caracteres | Regla de dominio lo rechaza | Pendiente de ejecutar | Pendiente |
+| UT-09 | Reapertura exactamente a las 48 horas | Regla temporal la acepta | Pendiente de ejecutar | Pendiente |
+| UT-10 | Porcentaje de cierre con total cero | “0,0 %” | Pendiente de ejecutar | Pendiente |
+
+### 7.4 Pruebas de integración requeridas
+
+Las tres pruebas de integración siguientes deben recorrer rutas y base de datos real de prueba (SQLite temporal); probar funciones puras por separado no basta.
+
+| ID | Flujo integrado | Preparación y acción | Resultado esperado | Resultado observado |
+|---|---|---|---|---|
+| INT-01 | S01: registro | Iniciar sesión como solicitante y enviar formulario válido; consultar incidencia y eventos en la base de prueba | Se crea una incidencia con código/autor/fecha/estado/prioridad definidos por el servidor y un evento REGISTRAR; datos y evento quedan juntos | Pendiente de ejecutar |
+| INT-02 | S02: asignación | Crear incidencia REGISTRADA; iniciar sesión como coordinador y asignar un técnico activo | Estado ASIGNADA, registro de asignación y evento ASIGNAR; intento inválido no deja cambios | Pendiente de ejecutar |
+| INT-03 | Transacción/seguridad | Intentar una operación no autorizada o provocar fallo controlado dentro de una operación de escritura | Respuesta de rechazo; estado, asignación, soluciones/cierres y eventos conservan su estado previo | Pendiente de ejecutar; elegir y documentar el fallo controlado sin alterar datos reales |
+
+### 7.5 Ejecución, hallazgos y regresión
+
+Registrar la ejecución con estos datos:
+- **Comando:** `python -m pytest -v`
+- **Fecha y entorno:** [completar con datos de la corrida real].
+- **Resultado:** [número de pruebas aprobadas/fallidas/omitidas; no inferirlo del historial].
+- **Evidencia versionada:** `docs/evidencias/pytest-AAAA-MM-DD.txt`.
+- **Commit/SHA probado:** [SHA exacto del código ejecutado].
+- **Hallazgos y correcciones:** [ID, descripción, cambio/commit y nueva prueba].
+- **Regresión:** volver a ejecutar la suite completa después de cada corrección y conservar la salida final. Comparar contra la corrida anterior e indicar pruebas añadidas, corregidas o que dejaron de pasar.
 
 ## 8. Riesgos
 Documentar cuatro riesgos concretos, causas, impactos, controles verificables, responsables y evidencias.
