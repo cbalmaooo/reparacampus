@@ -98,12 +98,19 @@ Cada usuario solo puede consultar las incidencias permitidas para su rol. Solo e
 **Cuando** el coordinador consulta el tablero  
 **Entonces** esa incidencia aparece entre las CRITICA no cerradas.
 
+### AC-S05-13 — El tablero refleja la reapertura y conserva el cierre
+
+**Dado** que hay cuatro incidencias, una está CERRADA y su evento de cierre consta en el historial  
+**Cuando** su solicitante dueño la reabre dentro de las 48 horas con un motivo válido  
+**Entonces** el porcentaje de cierre baja de 25,0 % a 0,0 %, la incidencia queda EN_ATENCION y el evento del cierre anterior permanece en el historial.
+
 ## Tareas propuestas
 
 - Crear la lista de incidencias con visibilidad según el rol.
 - Agregar filtros por estado y prioridad.
 - Mostrar el historial completo y protegerlo contra edición o borrado.
 - Crear el tablero del coordinador con sus cantidades e indicadores.
+- Verificar que la reapertura reduzca el porcentaje de cierre y conserve los cierres anteriores.
 - Crear pruebas para los criterios de aceptación.
 
 ## Revisión
