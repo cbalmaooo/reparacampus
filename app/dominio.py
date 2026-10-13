@@ -18,7 +18,14 @@ PLAZO_REAPERTURA = timedelta(hours=48)
 
 
 class ErrorValidacion(ValueError):
-    """Dato de entrada inválido. La operación debe rechazarse sin efectos."""
+    """Dato de entrada inválido. La operación debe rechazarse sin efectos.
+
+    Puede llevar varios mensajes: ErrorValidacion("a", "b") -> error.args == ("a", "b").
+    """
+
+
+class ErrorPermiso(Exception):
+    """El usuario de la sesión no puede ejecutar la operación."""
 
 
 def validar_texto(valor, minimo, maximo, etiqueta):

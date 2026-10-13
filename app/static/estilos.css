@@ -45,6 +45,22 @@ button:hover { background: var(--accion-oscura); }
 .boton-secundario:hover { background: rgba(255, 255, 255, .15); }
 :focus-visible { outline: 3px solid var(--accion); outline-offset: 2px; }
 .error { color: var(--error); font-weight: 600; }
+.error ul { margin: .25rem 0 0; }
+.aviso { padding: .75rem 1rem; background: var(--superficie); border-left: 6px solid #2f7d4f; }
+.formulario { max-width: 36rem; }
+select, textarea {
+  width: 100%; padding: .6rem .7rem; font: inherit;
+  border: 1px solid var(--borde); border-radius: 4px; background: #fff; color: var(--tinta);
+}
+fieldset { border: 0; padding: 0; margin: 1rem 0 0; }
+legend { font-weight: 600; margin-bottom: .25rem; }
+.opcion { display: inline-flex; align-items: center; gap: .35rem; font-weight: 400; margin: 0 1.25rem 0 0; }
+.opcion input { width: auto; }
+.boton {
+  display: inline-block; padding: .6rem 1.1rem; font-weight: 600; text-decoration: none;
+  background: var(--accion); color: #fff; border-radius: 4px;
+}
+.boton:hover { background: var(--accion-oscura); }
 @media (max-width: 30rem) {
   .barra { flex-direction: column; align-items: flex-start; }
   .tarjeta-login { margin: 1.5rem auto; padding: 1.5rem; }

@@ -23,3 +23,10 @@ class RelojFijo:
 
     def avanzar(self, **kwargs):
         self.instante += timedelta(**kwargs)
+
+
+def fecha_iso(instante):
+    """Formato único de fechas en la base: ISO 8601 en UTC, sin microsegundos."""
+    if instante.tzinfo is None:
+        raise ValueError("Las fechas deben tener zona horaria UTC")
+    return instante.astimezone(timezone.utc).isoformat(timespec="seconds")

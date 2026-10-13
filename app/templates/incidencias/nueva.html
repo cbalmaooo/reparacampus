@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block titulo %}Reportar un daño · ReparaCampus{% endblock %}
+{% block contenido %}
+<h1>Reportar un daño</h1>
+<p class="ayuda">Todos los campos son obligatorios. La prioridad la calcula el sistema.</p>
+
+{% if errores %}
+<div class="error" role="alert">
+  <p>No se registró la incidencia. Corrige lo siguiente:</p>
+  <ul>{% for mensaje in errores %}<li>{{ mensaje }}</li>{% endfor %}</ul>
+</div>
+{% endif %}
+
+<form method="post" action="{{ url_for('incidencias.crear') }}" class="formulario">
+  <label for="ubicacion">Ubicación</label>
+  <select id="ubicacion" name="ubicacion" required>
+    <option value="">Selecciona…</option>
+    {% for u in ubicaciones %}<option value="{{ u }}" {% if datos.ubicacion == u %}selected{% endif %}>{{ u }}</option>{% endfor %}
+  </select>
+
+  <label for="categoria">Categoría</label>
+  <select id="categoria" name="categoria" required>
+    <option value="">Selecciona…</option>
+    {% for c in categorias %}<option value="{{ c }}" {% if datos.categoria == c %}selected{% endif %}>{{ c|capitalize }}</option>{% endfor %}
+  </select>
+
+  <label for="descripcion">Qué pasó</label>
+  <textarea id="descripcion" name="descripcion" rows="4" minlength="20" maxlength="500" required>{{ datos.descripcion or '' }}</textarea>
+  <p class="ayuda">Entre 20 y 500 caracteres.</p>
+
+  <fieldset>
+    <legend>Impacto en las actividades</legend>
+    <label class="opcion"><input type="radio" name="impacto" value="BAJO" {% if datos.impacto == 'BAJO' %}checked{% endif %} required> Bajo</label>
+    <label class="opcion"><input type="radio" name="impacto" value="ALTO" {% if datos.impacto == 'ALTO' %}checked{% endif %}> Alto</label>
+  </fieldset>
+
+  <fieldset>
+    <legend>¿Hay riesgo para personas?</legend>
+    <label class="opcion"><input type="radio" name="riesgo_personas" value="true" {% if datos.riesgo_personas == 'true' %}checked{% endif %} required> Sí</label>
+    <label class="opcion"><input type="radio" name="riesgo_personas" value="false" {% if datos.riesgo_personas == 'false' %}checked{% endif %}> No</label>
+  </fieldset>
+
+  <button type="submit">Registrar incidencia</button>
+</form>
+{% endblock %}

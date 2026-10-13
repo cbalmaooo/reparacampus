@@ -3,6 +3,7 @@
 <h1>Hola, {{ usuario['nombre_usuario'] }}</h1>
 {% if usuario['rol'] == 'SOLICITANTE' %}
   <p>Aquí podrás registrar daños y seguir tus reportes.</p>
+  <p><a class="boton" href="{{ url_for('incidencias.nueva') }}">Reportar un daño</a></p>
 {% elif usuario['rol'] == 'COORDINADOR' %}
   <p>Aquí podrás ver todas las incidencias, asignarlas y consultar el tablero.</p>
 {% else %}
