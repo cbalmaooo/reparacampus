@@ -10,7 +10,7 @@
 ## Historial de versiones
 | Versión | Fecha | Autor | Cambio |
 |---|---|---|---|
-| 0.1 | 2026-10-12 | [autor original] | Borrador inicial |
+| 0.1 | 2026-10-12 | cbalmaooo | Borrador inicial |
 | 0.2 | 2026-10-13 | Alejandro Borja | Se reemplazan las preguntas 1 y 2, ya resueltas por el enunciado; se agregan los supuestos referenciados por S01, S04 y S05 |
 
 ## Preguntas al cliente
