@@ -10,7 +10,7 @@
 ### Historial de versiones
 | Versión | Fecha | Autor | Cambio |
 |---|---|---|---|
-| 0.1 | 2026-10-12 | [autor original] | Borrador inicial |
+| 0.1 | 2026-10-12 | cbalmaooo | Borrador inicial |
 | 0.2 | 2026-10-13 | Alejandro Borja | Correcciones de la revisión v0.1 |
 | 1.0 | 2026-10-13 | Alejandro Borja | Aprobación |
 
