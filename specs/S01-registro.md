@@ -108,9 +108,9 @@ Solo un usuario autenticado con rol de solicitante puede registrar incidencias.
 - Mostrar errores sin guardar incidencias inválidas.
 - Crear pruebas para los criterios de aceptación.
 
-## Revisión
-
-- **Revisó:** pendiente
-- **Fecha:** pendiente
-- **Decisión:** pendiente
-- **Observaciones:** pendiente
+## Decisión de revisión
+- Versión revisada: 1.0
+- Revisor: Alejandro Borja
+- Fecha: 2026-10-13
+- Decisión: Aprobada | Aprobada con cambios | Requiere cambios
+- Observaciones: [qué revisaste y qué encontraste; si no hay hallazgos, escribe "Sin hallazgos" y qué comprobaste]
