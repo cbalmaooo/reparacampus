@@ -79,3 +79,20 @@ th { font-size: .9rem; color: var(--tinta-suave); }
   position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
   overflow: hidden; clip: rect(0, 0, 0, 0); border: 0;
 }
+
+.ficha { background: var(--superficie); padding: 1.25rem 1.5rem; margin-bottom: 1rem; border-left: 6px solid var(--borde); }
+.ficha.estado-ASIGNADA { border-left-color: var(--accion); }
+.ficha.estado-EN_ATENCION { border-left-color: #2563a8; }
+.ficha h2 { font-size: 1.15rem; margin: 0 0 .25rem; }
+.ficha .meta { color: var(--tinta-suave); margin: 0 0 .75rem; }
+.ficha blockquote { margin: .5rem 0; padding-left: .75rem; border-left: 3px solid var(--borde); }
+
+.boton-claro { background: var(--superficie); color: var(--accion); border: 2px solid var(--accion); margin-left: .5rem; }
+.boton-claro:hover { background: var(--papel); }
+.ficha.estado-PENDIENTE_VALIDACION { border-left-color: #b7791f; }
+.ficha.estado-CERRADA { border-left-color: #2f7d4f; }
+.acciones { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); align-items: start; }
+.acciones form { margin: 0; }
+.acciones button { margin-top: .5rem; }
+.boton-alterno { background: var(--tinta); }
+.boton-alterno:hover { background: #33414f; }
