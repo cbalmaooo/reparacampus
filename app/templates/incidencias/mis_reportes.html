@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block titulo %}Mis reportes · ReparaCampus{% endblock %}
+{% block contenido %}
+<h1>Mis reportes</h1>
+<p class="ayuda">Cuando el técnico registre una solución, confírmala si el daño quedó resuelto o recházala explicando qué falta.</p>
+
+{% if error %}<p class="error" role="alert">{{ error }}</p>{% endif %}
+
+{% for r in reportes %}
+<article class="ficha estado-{{ r['estado'] }}">
+  <h2>{{ r['codigo'] }} · {{ r['ubicacion'] }}</h2>
+  <p class="meta">{{ r['categoria']|capitalize }} · prioridad <span class="prioridad-{{ r['prioridad'] }}">{{ r['prioridad']|capitalize }}</span> · estado {{ r['estado']|replace('_', ' ')|lower }}{% if r['tecnico'] %} · técnico {{ r['tecnico'] }}{% endif %}</p>
+  <p>{{ r['descripcion'] }}</p>
+
+  {% if r['ultima_solucion'] %}
+    <p class="ayuda">Solución del técnico:</p>
+    <blockquote>{{ r['ultima_solucion'] }}</blockquote>
+  {% endif %}
+
+  {% if r['estado'] == 'PENDIENTE_VALIDACION' %}
+  <div class="acciones">
+    <form method="post" action="{{ url_for('incidencias.confirmar', codigo=r['codigo']) }}">
+      <p>¿El daño quedó resuelto?</p>
+      <button type="submit">Confirmar solución</button>
+    </form>
+    <form method="post" action="{{ url_for('incidencias.rechazar', codigo=r['codigo']) }}">
+      <label for="rechazar-{{ r['codigo'] }}">Motivo del rechazo</label>
+      <textarea id="rechazar-{{ r['codigo'] }}" name="motivo" rows="2" minlength="10" maxlength="300" required>{{ borrador.get('rechazar-' ~ r['codigo']) or '' }}</textarea>
+      <button type="submit" class="boton-alterno">Rechazar solución</button>
+    </form>
+  </div>
+  {% elif r['estado'] == 'CERRADA' and r['reabrir_hasta'] %}
+    <form method="post" action="{{ url_for('incidencias.reabrir', codigo=r['codigo']) }}">
+      <label for="reabrir-{{ r['codigo'] }}">¿El daño volvió a aparecer? Motivo de la reapertura</label>
+      <textarea id="reabrir-{{ r['codigo'] }}" name="motivo" rows="2" minlength="10" maxlength="300" required>{{ borrador.get('reabrir-' ~ r['codigo']) or '' }}</textarea>
+      <p class="ayuda">Puedes reabrirla hasta {{ r['reabrir_hasta'][:16]|replace('T', ' ') }} UTC.</p>
+      <button type="submit" class="boton-alterno">Reabrir incidencia</button>
+    </form>
+  {% endif %}
+</article>
+{% else %}
+<p class="vacio">Aún no has reportado daños. <a href="{{ url_for('incidencias.nueva') }}">Reporta el primero</a>.</p>
+{% endfor %}
+{% endblock %}
