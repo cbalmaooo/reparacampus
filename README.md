@@ -82,5 +82,12 @@ y registrar el SHA con `git rev-parse HEAD`.
 
 ## Estado y limitaciones conocidas
 
-- Implementado: reglas de dominio, reloj inyectable, esquema v2, seed v2, inicio y cierre de sesión con control de rol, S01 (registrar incidencia), S02 (asignar a técnico activo), S03 (iniciar atención y registrar solución), S04 (confirmar, rechazar y reabrir en 48 h) y pruebas de integración INT-01 a INT-03.
-- Pendiente: S05 (listados con filtros, historial y tablero).
+- Implementado: autenticación con control de rol, S01 (registrar), S02 (asignar),
+  S03 (atender y solucionar), S04 (confirmar, rechazar y reabrir en 48 h),
+  S05 (listados con filtros, detalle con historial y tablero), pruebas de integración
+  INT-01 a INT-03.
+- Rutas principales: `/login`, `/incidencias/` (lista y filtros), `/incidencias/<código>`
+  (detalle e historial), `/incidencias/nueva`, `/incidencias/mis-reportes`,
+  `/incidencias/por-asignar`, `/incidencias/mis-asignaciones`, `/incidencias/tablero`.
+- Limitación conocida: los formularios no tienen token CSRF (mitigado en parte con
+  la cookie `SameSite=Lax`). No se requieren adjuntos, notificaciones ni hosting.

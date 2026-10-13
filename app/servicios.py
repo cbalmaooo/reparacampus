@@ -4,12 +4,15 @@ S01: registrar_incidencia.
 S02: listar_por_asignar, listar_tecnicos_activos, asignar_incidencia.
 S03: listar_asignaciones_de, iniciar_atencion, registrar_solucion.
 S04: listar_reportes_de, confirmar_solucion, rechazar_solucion, reabrir_incidencia.
+S05: listar_incidencias, obtener_detalle, calcular_tablero.
 """
 from datetime import datetime
 
 from .db import get_db, transaccion
 from .dominio import (
     CATEGORIAS,
+    ESTADOS,
+    PRIORIDADES,
     IMPACTOS,
     UBICACIONES,
     ErrorEstado,
@@ -19,6 +22,7 @@ from .dominio import (
     PLAZO_REAPERTURA,
     calcular_prioridad,
     dentro_de_plazo_reapertura,
+    porcentaje_cierre,
     parsear_riesgo,
     validar_descripcion,
     validar_motivo,
@@ -331,3 +335,112 @@ def reabrir_incidencia(codigo, motivo, usuario, reloj):
         )
         registrar_evento(conn, incidencia["id"], usuario["id"], "REABRIR",
                          "CERRADA", "EN_ATENCION", fecha_iso(instante), motivo=motivo_limpio)
+
+
+# ---------------------------------------------------------------- S05 ----
+
+ETIQUETAS_ACCION = {
+    "REGISTRAR": "Registró la incidencia",
+    "ASIGNAR": "Asignó la incidencia",
+    "INICIAR_ATENCION": "Inició la atención",
+    "REGISTRAR_SOLUCION": "Registró una solución",
+    "RECHAZAR": "Rechazó la solución",
+    "CONFIRMAR": "Confirmó la solución (cierre)",
+    "REABRIR": "Reabrió la incidencia",
+}
+
+_SELECT_LISTADO = (
+    "SELECT i.codigo, i.ubicacion, i.categoria, i.prioridad, i.estado, i.creada_en,"
+    " ut.nombre_usuario AS tecnico"
+    " FROM incidencias i"
+    " LEFT JOIN asignaciones a ON a.incidencia_id = i.id"
+    " LEFT JOIN usuarios ut ON ut.id = a.tecnico_id"
+)
+
+
+def _filtro_visibilidad(usuario):
+    """Condición SQL según el rol: la visibilidad se aplica en la consulta, no en la plantilla."""
+    if usuario["rol"] == "COORDINADOR":
+        return "1 = 1", []
+    if usuario["rol"] == "SOLICITANTE":
+        return "i.solicitante_id = ?", [usuario["id"]]
+    if usuario["rol"] == "TECNICO":
+        return "a.tecnico_id = ?", [usuario["id"]]
+    raise ErrorPermiso("Rol sin acceso a incidencias")
+
+
+def listar_incidencias(usuario, estado=None, prioridad=None):
+    """Incidencias visibles para el usuario, con filtros combinables (S05)."""
+    estado = estado or None
+    prioridad = prioridad or None
+    if (estado is not None and estado not in ESTADOS) or (prioridad is not None and prioridad not in PRIORIDADES):
+        raise ErrorValidacion("Filtro no válido")
+    condicion, parametros = _filtro_visibilidad(usuario)
+    sql = f"{_SELECT_LISTADO} WHERE {condicion}"
+    if estado:
+        sql += " AND i.estado = ?"
+        parametros.append(estado)
+    if prioridad:
+        sql += " AND i.prioridad = ?"
+        parametros.append(prioridad)
+    return get_db().execute(sql + " ORDER BY i.id", parametros).fetchall()
+
+
+def obtener_detalle(codigo, usuario):
+    """Incidencia, soluciones, cierres e historial, si el usuario puede verla (S05).
+
+    Si no existe o no está permitida, se responde "no encontrada" sin revelar datos.
+    """
+    db = get_db()
+    condicion, parametros = _filtro_visibilidad(usuario)
+    incidencia = db.execute(
+        "SELECT i.id, i.codigo, i.ubicacion, i.categoria, i.descripcion, i.impacto,"
+        " i.riesgo_personas, i.prioridad, i.estado, i.creada_en,"
+        " us.nombre_usuario AS solicitante, ut.nombre_usuario AS tecnico"
+        " FROM incidencias i JOIN usuarios us ON us.id = i.solicitante_id"
+        " LEFT JOIN asignaciones a ON a.incidencia_id = i.id"
+        " LEFT JOIN usuarios ut ON ut.id = a.tecnico_id"
+        f" WHERE i.codigo = ? AND {condicion}",
+        [codigo, *parametros],
+    ).fetchone()
+    if incidencia is None:
+        raise ErrorNoEncontrada("Incidencia no encontrada")
+
+    historial = db.execute(
+        "SELECT e.accion, e.estado_anterior, e.estado_nuevo, e.motivo, e.creado_en,"
+        " u.nombre_usuario AS autor, s.descripcion AS solucion,"
+        " CASE WHEN e.accion = 'ASIGNAR' THEN"
+        "  (SELECT t.nombre_usuario FROM asignaciones a2 JOIN usuarios t ON t.id = a2.tecnico_id"
+        "   WHERE a2.incidencia_id = e.incidencia_id) END AS tecnico_asignado"
+        " FROM eventos e JOIN usuarios u ON u.id = e.usuario_id"
+        " LEFT JOIN soluciones s ON s.id = e.solucion_id"
+        " WHERE e.incidencia_id = ? ORDER BY e.id",
+        (incidencia["id"],),
+    ).fetchall()
+    cierres = db.execute(
+        "SELECT cerrada_en FROM cierres WHERE incidencia_id = ? ORDER BY id", (incidencia["id"],)
+    ).fetchall()
+    return {"incidencia": incidencia, "historial": historial, "cierres": cierres}
+
+
+def calcular_tablero():
+    """Cantidades por estado y prioridad, críticas no cerradas y porcentaje de cierre (S05)."""
+    db = get_db()
+    por_estado = {e: 0 for e in ESTADOS}
+    for fila in db.execute("SELECT estado, COUNT(*) FROM incidencias GROUP BY estado"):
+        por_estado[fila[0]] = fila[1]
+    por_prioridad = {p: 0 for p in PRIORIDADES}
+    for fila in db.execute("SELECT prioridad, COUNT(*) FROM incidencias GROUP BY prioridad"):
+        por_prioridad[fila[0]] = fila[1]
+    criticas = db.execute(
+        f"{_SELECT_LISTADO} WHERE i.prioridad = 'CRITICA' AND i.estado <> 'CERRADA' ORDER BY i.id"
+    ).fetchall()
+    total = sum(por_estado.values())
+    return {
+        "por_estado": por_estado,
+        "por_prioridad": por_prioridad,
+        "criticas_abiertas": criticas,
+        "total": total,
+        "cerradas": por_estado["CERRADA"],
+        "porcentaje_cierre": porcentaje_cierre(por_estado["CERRADA"], total),
+    }

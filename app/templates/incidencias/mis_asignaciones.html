@@ -8,7 +8,7 @@
 
 {% for inc in incidencias %}
 <article class="ficha estado-{{ inc['estado'] }}">
-  <h2>{{ inc['codigo'] }} · {{ inc['ubicacion'] }}</h2>
+  <h2><a href="{{ url_for('incidencias.detalle', codigo=inc['codigo']) }}">{{ inc['codigo'] }}</a> · {{ inc['ubicacion'] }}</h2>
   <p class="meta">{{ inc['categoria']|capitalize }} · prioridad <span class="prioridad-{{ inc['prioridad'] }}">{{ inc['prioridad']|capitalize }}</span> · estado {{ inc['estado']|replace('_', ' ')|lower }}</p>
   <p>{{ inc['descripcion'] }}</p>
 

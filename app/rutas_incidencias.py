@@ -4,6 +4,8 @@ from flask import Blueprint, abort, current_app, flash, g, redirect, render_temp
 from .auth import login_requerido
 from .dominio import (
     CATEGORIAS,
+    ESTADOS,
+    PRIORIDADES,
     UBICACIONES,
     ErrorEstado,
     ErrorNoEncontrada,
@@ -12,7 +14,11 @@ from .dominio import (
 )
 from .servicios import (
     CAMPOS_REGISTRO,
+    ETIQUETAS_ACCION,
     asignar_incidencia,
+    calcular_tablero,
+    listar_incidencias,
+    obtener_detalle,
     confirmar_solucion,
     listar_reportes_de,
     reabrir_incidencia,
@@ -186,3 +192,34 @@ def reabrir(codigo):  # S04
     return _validar(lambda: reabrir_incidencia(codigo, motivo, g.usuario, reloj),
                     f"Reabriste {codigo}. Volvió al mismo técnico.",
                     borrador={f"reabrir-{codigo}": motivo})
+
+
+@bp.get("/")
+@login_requerido()
+def listado():  # S05: lista según rol, con filtros combinables
+    estado = request.args.get("estado", "")
+    prioridad = request.args.get("prioridad", "")
+    try:
+        incidencias, error, codigo_http = listar_incidencias(g.usuario, estado, prioridad), None, 200
+    except ErrorValidacion as exc:
+        incidencias, error, codigo_http = [], " ".join(exc.args), 400
+    return render_template(
+        "incidencias/listado.html", incidencias=incidencias, error=error,
+        estados=ESTADOS, prioridades=PRIORIDADES, filtro_estado=estado, filtro_prioridad=prioridad,
+    ), codigo_http
+
+
+@bp.get("/tablero")
+@login_requerido("COORDINADOR")
+def tablero():  # S05
+    return render_template("incidencias/tablero.html", t=calcular_tablero())
+
+
+@bp.get("/<codigo>")
+@login_requerido()
+def detalle(codigo):  # S05: detalle e historial con control de pertenencia
+    try:
+        datos = obtener_detalle(codigo, g.usuario)
+    except ErrorNoEncontrada as error:
+        return render_template("incidencias/no_encontrada.html", mensaje=str(error)), 404
+    return render_template("incidencias/detalle.html", etiquetas=ETIQUETAS_ACCION, **datos)
