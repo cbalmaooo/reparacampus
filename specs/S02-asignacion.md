@@ -82,9 +82,31 @@ Solo el coordinador puede asignar incidencias. Solo se puede asignar a un técni
 - Rechazar asignaciones sin permiso, a técnicos inactivos o en estados incompatibles.
 - Crear pruebas para los criterios de aceptación.
 
-## Revisión
-
-- **Revisó:** pendiente
-- **Fecha:** pendiente
-- **Decisión:** pendiente
-- **Observaciones:** pendiente
+## Decisión de revisión
+- Versión revisada: 0.1
+- Revisor: Alejandro Borja
+- Fecha: 2026-10-13
+- Decisión: Requiere cambios
+- Observaciones:
+  1. Historial (RF05): AC-S02-04 no indica que la asignación registra un evento
+     con autor, fecha, estado anterior (REGISTRADA), estado nuevo (ASIGNADA) y acción.
+     Agregarlo al criterio y a "Salidas y cambios persistidos".
+  2. Plantilla incompleta: faltan autor, revisor y fecha; entradas (id de incidencia
+     e id de técnico, obligatorios); precondiciones; salidas y cambios persistidos;
+     errores y efectos que deben evitarse; diseño vinculado a cada AC; pruebas y
+     resultados esperados.
+  3. Momento del cálculo de prioridad: precisar que se calcula en el servidor al
+     registrar (S01), se guarda y no puede modificarse; si la petición envía una
+     prioridad, se ignora.
+  4. Reasignación: AC-S02-07 debe mencionar explícitamente que no se permite.
+     Ejemplo: incidencia ASIGNADA a T01; el coordinador intenta asignarla a T02;
+     sigue con T01 y no se registra evento.
+  5. Destinatario inválido: falta un criterio para asignar a un usuario inexistente
+     o que no es técnico (por ejemplo, un solicitante).
+  6. Operaciones rechazadas: AC-S02-06 y AC-S02-08 deben indicar que no se crea
+     asignación ni evento de historial, igual que AC-S02-05.
+  7. Exclusiones: indicar que no hay restricción por especialidad del técnico
+     y que no hay reasignación.
+  8. Verificabilidad: usar datos concretos en los criterios (ids, T01/T02,
+     estados), como en el ejemplo del enunciado.
+- Próximo paso: el autor corrige y publica v0.2; nueva revisión para aprobar como v1.0.
