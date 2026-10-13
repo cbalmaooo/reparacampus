@@ -7,7 +7,7 @@ Examen SDD + IA · Ingeniería de Software I.
 
 | Componente | Versión |
 |---|---|
-| Python | 3.12 |
+| Python | 3.12 o 3.13 (probado en 3.12.3 y 3.13.15) |
 | Flask | 3.0.3 |
 | Werkzeug | 3.0.4 |
 | pytest | 8.3.3 |
@@ -18,8 +18,8 @@ Examen SDD + IA · Ingeniería de Software I.
 ```
 specs/          SPECS S01–S05 y preguntas al cliente
 docs/           diseño, diagramas, bitácora de IA y evidencias de pruebas
-db/schema.sql   esquema de la base de datos
-db/seed.sql     cinco cuentas ficticias
+database/schema.sql   esquema de la base de datos
+database/seed.sql     cinco cuentas ficticias
 app/            aplicación Flask (dominio, reloj, base de datos, rutas)
 tests/          pruebas pytest
 ```
