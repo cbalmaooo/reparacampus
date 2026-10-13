@@ -1,30 +1,27 @@
 # Diseño de ReparaCampus
 
-**Estado:** Borrador  
-**Tecnologías propuestas:** Python, Flask y SQLite
+**Versión de diseño:** 2.0  
+**Estado:** actualizado para describir la arquitectura implementada en la rama principal. La revisión de este cambio queda registrada en el pull request #20.  
+**Tecnologías:** Python, Flask, SQLite, HTML/CSS y pytest.
 
-## Partes del sistema
+## Componentes
 
-1. **Interfaz:** pantallas para iniciar sesión, registrar incidencias y consultar reportes.
-2. **Reglas del sistema:** comprueba permisos, calcula prioridades y controla los cambios de estado.
-3. **Base de datos:** guarda usuarios, incidencias, asignaciones, soluciones e historial.
+1. **Interfaz web:** plantillas HTML y CSS para autenticación, registro, asignación, atención, validación, consultas, historial y tablero.
+2. **Autenticación y rutas:** Flask mantiene la sesión y protege las rutas por rol; las rutas validan la petición y llaman a los servicios.
+3. **Dominio y servicios:** las reglas de prioridad, permisos, estados, plazo de reapertura y transacciones se ejecutan en el servidor.
+4. **Persistencia:** SQLite almacena usuarios, incidencias, asignaciones, soluciones, cierres y eventos. Las claves foráneas, restricciones y triggers apoyan la integridad y la conservación del historial.
+5. **Pruebas:** pytest usa una base SQLite independiente para comprobar reglas, permisos, persistencia y los recorridos de integración.
 
-La aplicación será un solo sistema Flask organizado en esas tres partes. Las reglas se comprobarán en el servidor, aunque la solicitud venga de una pantalla.
+## Modelo de datos
 
-## Datos que necesitamos guardar
+El modelo completo de entidades, relaciones, claves y restricciones se encuentra en [modelo-datos.md](modelo-datos.md) y en `database/schema.sql`. Las entidades principales son usuarios, incidencias, asignaciones, soluciones, cierres y eventos. Cada cierre y cada solución se conserva como registro histórico; el último cierre se obtiene de la tabla `cierres`.
 
-- **Usuarios:** nombre de acceso, contraseña guardada de forma segura, rol y si la cuenta está activa.
-- **Incidencias:** código, solicitante, ubicación, categoría, descripción, impacto, riesgo para personas, prioridad, estado y fecha de creación.
-- **Asignaciones:** incidencia, técnico asignado y coordinador que hizo la asignación.
-- **Soluciones:** incidencia, técnico, texto de la solución y fecha. Se guarda cada solución, aunque luego sea rechazada.
-- **Eventos:** quién hizo cada acción, cuándo, qué acción realizó, estado anterior y nuevo, y motivo si corresponde.
+## Flujo y permisos
 
-## Decisiones pendientes de revisión
+El solicitante registra incidencias y valida soluciones de sus propios reportes. El coordinador asigna una incidencia registrada a un técnico activo y puede consultar el tablero global. El técnico asignado inicia la atención y registra soluciones. Los permisos se verifican en el servidor en cada operación; una acción inválida no debe dejar cambios parciales ni eventos.
 
-El equipo debe confirmar que este diseño coincide con las SPECS revisadas antes de implementar la base de datos.
+Los estados son `REGISTRADA`, `ASIGNADA`, `EN_ATENCION`, `PENDIENTE_VALIDACION` y `CERRADA`. El diagrama de estados documenta el rechazo y la reapertura dentro de las 48 horas; el diagrama de secuencia muestra el rechazo de una solución. Ambos se incluyen en `docs/diagramas/`.
 
 ## Decisión tecnológica
 
-Usaremos Flask para el servidor porque permite construir el prototipo con Python y mantener las reglas del sistema en un solo lugar. Usaremos SQLite para guardar la información en un archivo, lo que facilita ejecutar y entregar el proyecto sin instalar un servidor de base de datos.
-
-Una alternativa sería PostgreSQL, que permite manejar mejor varios usuarios trabajando al mismo tiempo, pero requiere configurar un servicio adicional. Para este prototipo académico, Flask y SQLite son suficientes y más sencillos de ejecutar. Si el sistema se usara en producción con muchos usuarios, habría que evaluar una base de datos como PostgreSQL.
+Se eligió Flask porque permite mantener rutas y reglas de negocio en un prototipo pequeño y ejecutable con Python. SQLite guarda los datos en un archivo, simplifica la instalación desde una copia limpia y permite pruebas aisladas. PostgreSQL sería una alternativa para una instalación multiusuario de producción, pero añadiría configuración y un servicio de base de datos que no son necesarios para el alcance del examen. La aplicación se mantiene como monolito modular para reducir complejidad y separar interfaz, reglas y persistencia.
