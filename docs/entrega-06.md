@@ -35,17 +35,49 @@
 Generar automáticamente al maquetar el documento final. Incluir secciones, subsecciones y páginas.
 
 ## 3. Problema y alcance
-### 3.1 Necesidad y contexto
-[Describir el problema que resuelve el sistema y a quién afecta.]
-### 3.2 Actores y permisos
-[Actores, responsabilidades y permisos, contrastados con las SPECS y el código.]
-### 3.3 Requisitos
-[Requisitos funcionales y no funcionales, con identificadores y referencias.]
-### 3.4 Preguntas, respuestas y supuestos
-[Referenciar specs/preguntas-cliente.md. Separar respuestas confirmadas de supuestos.]
-### 3.5 Límites del prototipo
-[Qué incluye la versión evaluada y qué queda fuera.]
 
+### 3.1 Necesidad y contexto
+
+ReparaCampus es un prototipo web para registrar y gestionar incidencias de infraestructura en la Universidad Simón Bolívar. Busca organizar el ciclo desde el reporte de un daño hasta su asignación, atención técnica y validación por quien lo reportó. También conserva un historial de las acciones para facilitar el seguimiento y la consulta de lo ocurrido.
+
+### 3.2 Actores y permisos
+
+| Actor | Responsabilidades y permisos principales |
+|---|---|
+| Solicitante | Registrar incidencias, consultar las propias, revisar el historial, confirmar una solución, rechazarla con motivo o reabrirla dentro de las 48 horas posteriores al último cierre. |
+| Coordinador | Consultar todas las incidencias, ver el tablero general y asignar las incidencias registradas a técnicos activos. |
+| Técnico | Consultar las incidencias asignadas, iniciar su atención y registrar soluciones. |
+| Sistema | Validar entradas, calcular prioridad, generar código y fechas, verificar permisos, controlar transiciones y registrar eventos dentro de transacciones. |
+
+Los permisos deben comprobarse en el servidor. La interfaz no sustituye la autorización de cada operación.
+
+### 3.3 Requisitos
+
+| ID | Requisito funcional resumido | SPEC |
+|---|---|---|
+| RF01 | Registrar una incidencia con los campos requeridos, código generado por el sistema y prioridad calculada. | S01 |
+| RF02 | Priorizar y asignar una incidencia a un técnico activo autorizado. | S02 |
+| RF03 | Iniciar la atención y registrar una o más soluciones, conservando las anteriores. | S03 |
+| RF04 | Confirmar, rechazar o reabrir una incidencia respetando permisos, motivos y plazo de 48 horas. | S04 |
+| RF05 | Consultar incidencias según el rol, aplicar filtros, consultar el historial y mostrar un tablero para el coordinador. | S05 |
+
+Entre las restricciones no funcionales relevantes están la validación del lado servidor, la persistencia transaccional, la conservación del historial, el almacenamiento de contraseñas mediante hash y la ejecución reproducible de pruebas automatizadas.
+
+### 3.4 Preguntas, respuestas y supuestos
+
+El archivo `specs/preguntas-cliente.md` registra preguntas que siguen pendientes de respuesta del cliente. Mientras se obtiene una respuesta, el equipo aplica estos supuestos provisionales:
+
+| Tema pendiente | Supuesto aplicado | Efecto |
+|---|---|---|
+| Formato y consecutivo del código | Código `INC-0001`, único y generado por el servidor. | Permite identificar las incidencias de forma uniforme. |
+| Cantidad máxima de rechazos o reaperturas | No hay límite de cantidad si se cumplen las reglas de estado, propiedad, motivo y plazo. | No se bloquean ciclos adicionales por un contador no exigido. |
+| Consulta de incidencias ajenas | Responder “Incidencia no encontrada”, sin confirmar que el registro existe. | Reduce la exposición de información entre usuarios. |
+
+Otros supuestos documentados son usar la hora UTC del servidor, recortar espacios externos de los textos y mantener el técnico asignado al rechazar o reabrir. Estos supuestos no deben presentarse como respuestas confirmadas del cliente.
+
+### 3.5 Límites del prototipo
+
+La versión evaluada es una aplicación web Flask con base de datos SQLite y cuentas ficticias cargadas mediante seed. El alcance excluye creación de usuarios, recuperación de contraseña, edición de perfiles, adjuntos, notificaciones, exportación de reportes y búsqueda de texto libre. El README identifica como limitación conocida la ausencia de token CSRF en los formularios. No se debe describir el prototipo como un sistema desplegado en producción.
 ## 4. Cinco SPECS
 
 Las especificaciones fuente están en la carpeta `specs/`. Los estados que se muestran aquí corresponden a los encabezados consultados el 13 de octubre de 2026; se deben volver a comprobar al congelar la versión de entrega.
@@ -106,17 +138,148 @@ Las especificaciones fuente están en la carpeta `specs/`. Los estados que se mu
 - No se considera cerrada la validación de una SPEC hasta enlazar sus criterios con código y pruebas ejecutadas.
 - La evidencia de revisión previa debe ser verificable (PR, commit, revisión registrada o acta); el historial de versiones dentro del Markdown, por sí solo, no reemplaza automáticamente esa evidencia.
 ## 5. Diseño
-### 5.1 Componentes y arquitectura
-[Diagrama legible y explicación de responsabilidades.]
-### 5.2 Modelo de datos
-[Diagrama consistente con database/schema.sql; explicar entidades, relaciones, claves y restricciones. Revisar docs/modelo-datos.md.]
-### 5.3 UML de estados
-[Diagrama, explicación de estados, transiciones y condiciones. Revisar docs/diagrama-estados.md.]
-### 5.4 UML de secuencia
-[Diagrama de un flujo relevante y explicación de participantes y mensajes. Revisar docs/diagrama-secuencia-rechazo.md u otro si corresponde.]
-### 5.5 Decisión tecnológica
-[Justificar las tecnologías según requisitos, alcance y restricciones del equipo.]
 
+### 5.1 Componentes y arquitectura
+
+ReparaCampus utiliza una arquitectura web por capas, con responsabilidades separadas:
+
+- **Interfaz web:** plantillas HTML bajo `templates/`; presenta formularios, listados, detalle, historial y tablero.
+- **Rutas HTTP:** `app/rutas_incidencias.py` recibe solicitudes, aplica los decoradores de acceso y convierte errores del dominio en respuestas HTTP o mensajes de interfaz.
+- **Autenticación y autorización:** `app/auth.py` gestiona inicio/cierre de sesión y protege rutas según el rol.
+- **Servicios de negocio:** `app/servicios.py` ejecuta las operaciones S01–S05 y coordina validaciones, transacciones y consultas.
+- **Dominio:** `app/dominio.py` contiene reglas como cálculo de prioridad, límites de texto y plazo de reapertura.
+- **Persistencia:** `app/db.py` administra el acceso a SQLite; `database/schema.sql` define tablas, restricciones y triggers; `database/seed.sql` contiene las cuentas ficticias.
+- **Historial y tiempo:** `app/historial.py` registra eventos; `app/reloj.py` normaliza fechas y permite inyectar un reloj controlado para pruebas.
+
+La separación permite probar reglas y servicios sin depender de la interfaz, y usar una base SQLite temporal en las pruebas automatizadas. La verificación final debe hacerse sobre el commit exacto de entrega.
+
+### 5.2 Modelo de datos
+
+El esquema SQL de referencia utiliza las entidades siguientes. El diagrama se expresa aquí en relación con `database/schema.sql`; el archivo independiente `docs/modelo-datos.md` aún debe alinearse antes de considerar cerrada la documentación del modelo.
+
+```mermaid
+erDiagram
+    USUARIOS ||--o{ INCIDENCIAS : reporta
+    INCIDENCIAS ||--o| ASIGNACIONES : tiene
+    USUARIOS ||--o{ ASIGNACIONES : coordina
+    USUARIOS ||--o{ ASIGNACIONES : recibe
+    INCIDENCIAS ||--o{ SOLUCIONES : conserva
+    USUARIOS ||--o{ SOLUCIONES : escribe
+    INCIDENCIAS ||--o{ CIERRES : conserva
+    USUARIOS ||--o{ CIERRES : confirma
+    INCIDENCIAS ||--o{ EVENTOS : registra
+    USUARIOS ||--o{ EVENTOS : realiza
+
+    USUARIOS {
+        int id PK
+        string nombre_usuario UK
+        string contrasena_hash
+        string rol
+        boolean activo
+    }
+    INCIDENCIAS {
+        int id PK
+        string codigo UK
+        int solicitante_id FK
+        string ubicacion
+        string categoria
+        string descripcion
+        string impacto
+        boolean riesgo_personas
+        string prioridad
+        string estado
+        datetime creada_en
+    }
+    ASIGNACIONES {
+        int id PK
+        int incidencia_id FK_UK
+        int coordinador_id FK
+        int tecnico_id FK
+        datetime asignada_en
+    }
+    SOLUCIONES {
+        int id PK
+        int incidencia_id FK
+        int tecnico_id FK
+        string descripcion
+        datetime creada_en
+    }
+    CIERRES {
+        int id PK
+        int incidencia_id FK
+        int solicitante_id FK
+        datetime cerrada_en
+    }
+    EVENTOS {
+        int id PK
+        int incidencia_id FK
+        int usuario_id FK
+        string accion
+        string estado_anterior
+        string estado_nuevo
+        string motivo
+        int solucion_id FK
+        datetime creado_en
+    }
+```
+
+Las claves foráneas relacionan usuarios e incidencias con sus registros de asignación, solución, cierre e historial. La tabla de asignaciones impone una sola asignación por incidencia. La tabla `cierres` conserva cada confirmación, en vez de sobrescribir la fecha de cierre en la incidencia. Las restricciones y triggers de SQLite refuerzan los valores permitidos y la inmutabilidad de registros históricos.
+
+### 5.3 UML de estados
+
+```mermaid
+stateDiagram-v2
+    [*] --> REGISTRADA: solicitante registra
+    REGISTRADA --> ASIGNADA: coordinador asigna técnico activo
+    ASIGNADA --> EN_ATENCION: técnico asignado inicia
+    EN_ATENCION --> PENDIENTE_VALIDACION: técnico registra solución
+    PENDIENTE_VALIDACION --> CERRADA: solicitante confirma
+    PENDIENTE_VALIDACION --> EN_ATENCION: solicitante rechaza
+    CERRADA --> EN_ATENCION: solicitante reabre en 48 h
+```
+
+Las transiciones están condicionadas por el rol y la propiedad del registro. Para reabrir, el plazo se calcula desde el último cierre y se acepta hasta las 48 horas exactas. Al rechazar o reabrir se conserva el técnico asignado y no se eliminan las soluciones ni cierres anteriores. Una operación rechazada no debe cambiar el estado ni agregar eventos.
+
+### 5.4 UML de secuencia: rechazo de solución
+
+```mermaid
+sequenceDiagram
+    actor Solicitante
+    participant UI as Interfaz web
+    participant Ruta as Ruta Flask
+    participant Servicio as Servicio de negocio
+    participant BD as SQLite
+
+    Solicitante->>UI: Ingresa motivo y pulsa Rechazar
+    UI->>Ruta: POST con incidencia y motivo
+    Ruta->>Servicio: rechazar_solucion(código, usuario, motivo, reloj)
+    Servicio->>BD: Consultar incidencia, dueño y estado
+    BD-->>Servicio: Datos actuales
+    Servicio->>Servicio: Validar rol, propiedad, estado y motivo
+    alt Datos válidos
+        Servicio->>BD: Transacción: cambiar estado y registrar evento
+        BD-->>Servicio: Confirmación
+        Servicio-->>Ruta: Operación exitosa
+        Ruta-->>UI: Redirigir y mostrar mensaje
+    else Operación no válida
+        Servicio-->>Ruta: Error de permiso, estado o validación
+        Ruta-->>UI: Rechazo sin cambios persistidos
+    end
+```
+
+La secuencia muestra que la ruta no debe ejecutar directamente las reglas de negocio: delega la operación al servicio, que valida y persiste los cambios de forma transaccional.
+
+### 5.5 Decisión tecnológica
+
+| Tecnología | Motivo de elección en el prototipo |
+|---|---|
+| Python 3.12 | Entorno usado en la ejecución de pruebas de CI; facilita implementar y probar las reglas. |
+| Flask 3.0.3 | Framework web ligero, suficiente para rutas, sesiones y plantillas sin una infraestructura compleja. |
+| SQLite | Base relacional integrada en Python, fácil de inicializar y adecuada para el alcance académico; permite usar bases temporales en pruebas. |
+| pytest 8.3.3 | Permite automatizar pruebas unitarias, de rutas, persistencia e integración con resultados reproducibles. |
+| GitHub Actions | Ejecuta la suite automáticamente en el flujo de integración y deja un registro verificable del resultado. |
+
+La elección prioriza simplicidad, facilidad de instalación y validación dentro del alcance académico. No implica que SQLite o el prototipo estén preparados por sí mismos para una operación productiva de alto volumen.
 ## 6. IA e implementación
 ### 6.1 Herramientas y versiones
 | Herramienta/modelo | Versión/identificador | Uso | Evidencia |
@@ -210,14 +373,13 @@ Se añadió el flujo `.github/workflows/tests.yml` en esta rama para ejecutar `p
 **Resultado verificado:** [ejecución 38473858776](https://github.com/cbalmaooo/reparacampus/actions/runs/38473858776) — `success`, 154 pruebas aprobadas. El commit de integración evaluado fue `2d51d8ff5ff50a4b8d87a2cf92c3ed23ea942d5a`. Antes de la entrega final, volver a ejecutar la suite contra el SHA etiquetado como `release-examen`.
 
 ## 8. Riesgos
-Documentar cuatro riesgos concretos, causas, impactos, controles verificables, responsables y evidencias.
-| ID | Riesgo/causa | Impacto | Control | Responsable | Evidencia | Estado |
-|---|---|---|---|---|---|---|
-| R01 | [Completar] | | | | | Pendiente |
-| R02 | [Completar] | | | | | Pendiente |
-| R03 | [Completar] | | | | | Pendiente |
-| R04 | [Completar] | | | | | Pendiente |
 
+| ID | Riesgo/causa | Impacto | Control verificable | Responsable | Evidencia | Estado |
+|---|---|---|---|---|---|---|
+| R01 | Los formularios no tienen token CSRF, limitación reconocida en el README. | Una solicitud no deseada podría intentar ejecutar una acción desde una sesión autenticada. | Mantener la cookie `SameSite=Lax`, documentar la limitación y no presentar la versión como producción; valorar token CSRF como trabajo futuro. | Equipo Equihire; asignación individual pendiente de confirmar. | README de la versión de integración; rutas POST en `app/rutas_incidencias.py`. | Limitación conocida |
+| R02 | Un permiso aplicado solo en la interfaz permitiría acceso indebido si no se valida en el servidor. | Exposición o modificación de incidencias de otros usuarios. | Decoradores por rol, validación de propiedad en servicios y pruebas de acceso por rol/registro. | Equipo Equihire; asignación individual pendiente de confirmar. | `app/auth.py`, `app/servicios.py`, `tests/test_auth.py`, `tests/test_s05_consultas.py`. | Controles y pruebas presentes; suite CI aprobada |
+| R03 | Una operación que no sea atómica podría guardar el estado sin su evento o solución. | Historial inconsistente y dificultad para auditar la incidencia. | Usar transacciones; mantener restricciones y triggers en SQLite; probar que las operaciones rechazadas no dejan cambios parciales. | Equipo Equihire; asignación individual pendiente de confirmar. | `app/db.py`, `app/historial.py`, `database/schema.sql`, pruebas S01–S04 y de esquema. | Controles y pruebas presentes; suite CI aprobada |
+| R04 | Documentos técnicos o instrucciones de instalación pueden quedar desactualizados respecto del esquema o del commit evaluado. | El evaluador podría reproducir una versión distinta o interpretar mal el modelo. | Alinear el modelo de datos con `database/schema.sql`, registrar el SHA/tag final y volver a ejecutar pruebas sobre esa versión exacta. | Equipo Equihire; asignación individual pendiente de confirmar. | `docs/modelo-datos.md`, `README.md`, sección 9 de este informe y ejecución de GitHub Actions. | Pendiente de cierre documental |
 ## 9. Entrega reproducible
 ### 9.1 Repositorio y versión
 - URL: https://github.com/cbalmaooo/reparacampus
@@ -225,22 +387,73 @@ Documentar cuatro riesgos concretos, causas, impactos, controles verificables, r
 - SHA exacto: [registrar después de congelar la versión]
 - Fecha de congelación: [pendiente]
 ### 9.2 Instalación y requisitos
-[Versiones requeridas, entorno virtual y dependencias. Mantener el procedimiento completo en README.md.]
+
+- Python 3.12 o 3.13.
+- Dependencias fijadas en `requirements.txt`: Flask 3.0.3, Werkzeug 3.0.4 y pytest 8.3.3.
+- SQLite, incluido con Python.
+- Git para clonar el repositorio.
+
+En una copia limpia:
+
+```bash
+git clone https://github.com/cbalmaooo/reparacampus.git
+cd reparacampus
+python -m venv .venv
+```
+
+Activación del entorno:
+- Windows PowerShell: `.venv\\Scripts\\Activate.ps1`
+- Linux/macOS: `source .venv/bin/activate`
+
+Instalar dependencias:
+
+```bash
+python -m pip install -r requirements.txt
+```
+
 ### 9.3 Configuración y arranque
-[Variables necesarias y comando confirmado; nunca incluir secretos.]
+
+Inicializar la base de datos con las cuentas ficticias y arrancar la aplicación:
+
+```bash
+flask --app app init-db --seed
+flask --app app run
+```
+
+El README indica que la base persistente se crea en `instance/reparacampus.sqlite`. Para reiniciar el entorno de demostración, detener la aplicación, eliminar esa base local y ejecutar de nuevo el comando de inicialización con seed. No eliminar bases que contengan datos que se quieran conservar.
+
 ### 9.4 Base de datos y seed
-[Pasos exactos para inicializar y cargar datos ficticios; comprobar reproducibilidad.]
+
+El esquema se encuentra en `database/schema.sql` y las cuentas ficticias en `database/seed.sql`. La inicialización reproducible se realiza con `flask --app app init-db --seed`. Las pruebas automatizadas usan bases SQLite temporales y no deberían alterar la base persistente de la instancia.
+
 ### 9.5 Cuentas ficticias
-| Rol | Usuario ficticio | Credencial de demostración | Método de generación/restablecimiento |
-|---|---|---|---|
-| [Completar] | | | |
-No incluir cuentas reales, contraseñas reales, tokens ni claves.
+
+Usar solo estas cuentas de demostración, no cuentas reales:
+
+| Rol | Usuario | Contraseña de demostración |
+|---|---|---|
+| Coordinador | `coordinador1` | `Coordinador1*2026` |
+| Solicitante | `solicitante1` | `Solicitante1*2026` |
+| Solicitante | `solicitante2` | `Solicitante2*2026` |
+| Técnico | `tecnico1` | `Tecnico1*2026` |
+| Técnico | `tecnico2` | `Tecnico2*2026` |
+
+Las contraseñas se almacenan como hashes en la base de datos; las credenciales anteriores son únicamente para la demostración del prototipo.
+
 ### 9.6 Comandos de pruebas
-- Suite automatizada: [comando confirmado]
-- Integración: [comando confirmado]
-- Resultado esperado: [basado en ejecución real]
+
+```bash
+python -m pytest -v
+```
+
+En GitHub Actions se ejecutó ese comando con Python 3.12.15 y pytest 8.3.3; el commit de integración documentado en la sección 7 obtuvo 154 pruebas aprobadas. Repetirlo después de clonar la versión final y registrar el resultado y el SHA exacto. No confundir el resultado del commit de integración del PR con el resultado de un futuro tag `release-examen`.
+
 ### 9.7 Limitaciones conocidas
-[Limitaciones reproducibles de la versión exacta entregada.]
+
+- Los formularios no tienen token CSRF; el README registra la cookie `SameSite=Lax` como mitigación parcial.
+- No se incluyen registro de usuarios, recuperación de contraseñas, edición de perfiles, adjuntos, notificaciones, exportación ni búsqueda de texto libre.
+- La ejecución de CI acredita las pruebas automatizadas de ese commit; la versión final debe probarse de nuevo después de etiquetarla.
+- La documentación independiente del modelo de datos requiere alineación con el esquema SQL antes de cerrar la entrega.
 
 ## 10. Contribuciones y cierre
 ### 10.1 Contribuciones
