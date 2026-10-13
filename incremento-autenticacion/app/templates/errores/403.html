@@ -1,0 +1,6 @@
+{% extends "base.html" %}
+{% block titulo %}Sin permiso · ReparaCampus{% endblock %}
+{% block contenido %}
+<h1>No tienes permiso para esta acción</h1>
+<p><a href="{{ url_for('inicio') }}">Volver al inicio</a></p>
+{% endblock %}

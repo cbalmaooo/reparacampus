@@ -1,0 +1,51 @@
+/* Paleta de orden de trabajo: azul pizarra, papel frío y naranja de seguridad para acciones. */
+:root {
+  --papel: #eef1f4;
+  --superficie: #ffffff;
+  --tinta: #1e2a36;
+  --tinta-suave: #52606d;
+  --accion: #c4540a;
+  --accion-oscura: #9a4108;
+  --error: #b42318;
+  --borde: #cdd5dd;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: "Segoe UI", system-ui, -apple-system, Roboto, sans-serif;
+  background: var(--papel);
+  color: var(--tinta);
+  line-height: 1.5;
+}
+.barra {
+  display: flex; justify-content: space-between; align-items: center; gap: 1rem;
+  padding: .75rem 1.5rem; background: var(--tinta); color: #fff;
+}
+.marca { color: #fff; font-weight: 700; text-decoration: none; font-size: 1.1rem; }
+.sesion { display: flex; align-items: center; gap: .75rem; }
+.sesion form { margin: 0; }
+main { max-width: 64rem; margin: 0 auto; padding: 2rem 1.5rem; }
+h1 { font-size: 1.6rem; margin: 0 0 .5rem; }
+.tarjeta-login {
+  max-width: 24rem; margin: 3rem auto; padding: 2rem;
+  background: var(--superficie); border-left: 6px solid var(--accion);
+}
+.ayuda { color: var(--tinta-suave); margin-top: 0; }
+label { display: block; font-weight: 600; margin: 1rem 0 .25rem; }
+input {
+  width: 100%; padding: .6rem .7rem; font: inherit;
+  border: 1px solid var(--borde); border-radius: 4px; background: #fff; color: var(--tinta);
+}
+button {
+  margin-top: 1.25rem; padding: .6rem 1.1rem; font: inherit; font-weight: 600;
+  background: var(--accion); color: #fff; border: 0; border-radius: 4px; cursor: pointer;
+}
+button:hover { background: var(--accion-oscura); }
+.boton-secundario { margin: 0; background: transparent; border: 1px solid #fff; }
+.boton-secundario:hover { background: rgba(255, 255, 255, .15); }
+:focus-visible { outline: 3px solid var(--accion); outline-offset: 2px; }
+.error { color: var(--error); font-weight: 600; }
+@media (max-width: 30rem) {
+  .barra { flex-direction: column; align-items: flex-start; }
+  .tarjeta-login { margin: 1.5rem auto; padding: 1.5rem; }
+}

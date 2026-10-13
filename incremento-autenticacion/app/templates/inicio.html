@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block contenido %}
+<h1>Hola, {{ usuario['nombre_usuario'] }}</h1>
+{% if usuario['rol'] == 'SOLICITANTE' %}
+  <p>Aquí podrás registrar daños y seguir tus reportes.</p>
+{% elif usuario['rol'] == 'COORDINADOR' %}
+  <p>Aquí podrás ver todas las incidencias, asignarlas y consultar el tablero.</p>
+{% else %}
+  <p>Aquí verás las incidencias que tienes asignadas.</p>
+{% endif %}
+{% endblock %}
