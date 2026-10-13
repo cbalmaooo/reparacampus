@@ -1,0 +1,6 @@
+{% extends "base.html" %}
+{% block titulo %}No encontrada · ReparaCampus{% endblock %}
+{% block contenido %}
+<h1>{{ mensaje }}</h1>
+<p><a href="{{ url_for('incidencias.listado') }}">Volver a la lista</a></p>
+{% endblock %}

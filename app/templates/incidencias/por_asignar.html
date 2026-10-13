@@ -15,7 +15,7 @@
   <tbody>
   {% for inc in incidencias %}
     <tr>
-      <td>{{ inc['codigo'] }}</td>
+      <td><a href="{{ url_for('incidencias.detalle', codigo=inc['codigo']) }}">{{ inc['codigo'] }}</a></td>
       <td>{{ inc['ubicacion'] }}</td>
       <td>{{ inc['categoria']|capitalize }}</td>
       <td class="prioridad-{{ inc['prioridad'] }}">{{ inc['prioridad']|capitalize }}</td>

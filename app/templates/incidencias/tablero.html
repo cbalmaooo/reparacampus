@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block titulo %}Tablero · ReparaCampus{% endblock %}
+{% block contenido %}
+<h1>Tablero de mantenimiento</h1>
+
+<div class="tablero">
+  <section class="cifra-cierre" aria-label="Porcentaje de cierre">
+    <strong>{{ t['porcentaje_cierre'] }}</strong>
+    <span>de las incidencias están cerradas ({{ t['cerradas'] }} de {{ t['total'] }})</span>
+  </section>
+
+  <section class="conteos">
+    <h2>Por estado</h2>
+    <table>{% for estado, n in t['por_estado'].items() %}<tr><td>{{ estado|replace('_', ' ')|capitalize }}</td><td>{{ n }}</td></tr>{% endfor %}</table>
+  </section>
+
+  <section class="conteos">
+    <h2>Por prioridad</h2>
+    <table>{% for prioridad, n in t['por_prioridad'].items() %}<tr><td class="prioridad-{{ prioridad }}">{{ prioridad|capitalize }}</td><td>{{ n }}</td></tr>{% endfor %}</table>
+  </section>
+</div>
+
+<h2>Críticas sin cerrar</h2>
+{% if t['criticas_abiertas'] %}
+<div class="tabla-contenedor" id="criticas">
+<table>
+  <thead><tr><th>Código</th><th>Ubicación</th><th>Estado</th><th>Técnico</th></tr></thead>
+  <tbody>
+  {% for i in t['criticas_abiertas'] %}
+    <tr>
+      <td><a href="{{ url_for('incidencias.detalle', codigo=i['codigo']) }}">{{ i['codigo'] }}</a></td>
+      <td>{{ i['ubicacion'] }}</td>
+      <td>{{ i['estado']|replace('_', ' ')|capitalize }}</td>
+      <td>{{ i['tecnico'] or 'Sin asignar' }}</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{% else %}
+<p class="vacio" id="criticas">No hay incidencias críticas abiertas.</p>
+{% endif %}
+{% endblock %}

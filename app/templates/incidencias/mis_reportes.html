@@ -8,7 +8,7 @@
 
 {% for r in reportes %}
 <article class="ficha estado-{{ r['estado'] }}">
-  <h2>{{ r['codigo'] }} · {{ r['ubicacion'] }}</h2>
+  <h2><a href="{{ url_for('incidencias.detalle', codigo=r['codigo']) }}">{{ r['codigo'] }}</a> · {{ r['ubicacion'] }}</h2>
   <p class="meta">{{ r['categoria']|capitalize }} · prioridad <span class="prioridad-{{ r['prioridad'] }}">{{ r['prioridad']|capitalize }}</span> · estado {{ r['estado']|replace('_', ' ')|lower }}{% if r['tecnico'] %} · técnico {{ r['tecnico'] }}{% endif %}</p>
   <p>{{ r['descripcion'] }}</p>
 

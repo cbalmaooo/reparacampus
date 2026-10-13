@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block titulo %}{{ incidencia['codigo'] }} · ReparaCampus{% endblock %}
+{% block contenido %}
+<h1>{{ incidencia['codigo'] }} · {{ incidencia['estado']|replace('_', ' ')|capitalize }}</h1>
+
+<dl class="datos">
+  <dt>Ubicación</dt><dd>{{ incidencia['ubicacion'] }}</dd>
+  <dt>Categoría</dt><dd>{{ incidencia['categoria']|capitalize }}</dd>
+  <dt>Descripción</dt><dd>{{ incidencia['descripcion'] }}</dd>
+  <dt>Impacto</dt><dd>{{ incidencia['impacto']|capitalize }}</dd>
+  <dt>Riesgo para personas</dt><dd>{{ 'Sí' if incidencia['riesgo_personas'] else 'No' }}</dd>
+  <dt>Prioridad</dt><dd class="prioridad-{{ incidencia['prioridad'] }}">{{ incidencia['prioridad']|capitalize }}</dd>
+  <dt>Solicitante</dt><dd>{{ incidencia['solicitante'] }}</dd>
+  <dt>Técnico</dt><dd>{{ incidencia['tecnico'] or 'Sin asignar' }}</dd>
+  <dt>Cierres</dt><dd>{% for c in cierres %}{{ c['cerrada_en'][:16]|replace('T', ' ') }} UTC{% if not loop.last %}; {% endif %}{% else %}Ninguno{% endfor %}</dd>
+</dl>
+
+<h2>Historial</h2>
+<p class="ayuda">Registro permanente: no se puede editar ni borrar.</p>
+<ol class="linea-tiempo">
+{% for e in historial %}
+  <li>
+    <div class="cuando">{{ e['creado_en'][:19]|replace('T', ' ') }} UTC · {{ e['autor'] }}</div>
+    <strong>{{ etiquetas.get(e['accion'], e['accion']) }}</strong>{% if e['tecnico_asignado'] %} a {{ e['tecnico_asignado'] }}{% endif %}
+    <div class="transicion">{{ (e['estado_anterior'] or 'inicio')|replace('_', ' ')|lower }} → {{ e['estado_nuevo']|replace('_', ' ')|lower }}</div>
+    {% if e['solucion'] %}<blockquote>{{ e['solucion'] }}</blockquote>{% endif %}
+    {% if e['motivo'] %}<blockquote>Motivo: {{ e['motivo'] }}</blockquote>{% endif %}
+  </li>
+{% endfor %}
+</ol>
+<p><a href="{{ url_for('incidencias.listado') }}">Volver a la lista</a></p>
+{% endblock %}
