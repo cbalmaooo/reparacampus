@@ -82,5 +82,5 @@ y registrar el SHA con `git rev-parse HEAD`.
 
 ## Estado y limitaciones conocidas
 
-- Implementado: reglas de dominio, reloj inyectable, esquema v2, seed v2, inicio y cierre de sesión con control de rol, S01 (registrar incidencia).
-- Pendiente: S02 a S05, interfaz, pruebas de integración INT-01 a INT-03.
+- Implementado: reglas de dominio, reloj inyectable, esquema v2, seed v2, inicio y cierre de sesión con control de rol, S01 (registrar incidencia), S02 (asignar a técnico activo).
+- Pendiente: S03 a S05, interfaz, pruebas de integración INT-01 a INT-03.

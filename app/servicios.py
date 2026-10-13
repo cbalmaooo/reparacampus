@@ -1,12 +1,15 @@
 """Servicios de negocio. Aquí se ejecutan las reglas; las rutas solo traducen HTTP.
 
 S01: registrar_incidencia.
+S02: listar_por_asignar, listar_tecnicos_activos, asignar_incidencia.
 """
-from .db import transaccion
+from .db import get_db, transaccion
 from .dominio import (
     CATEGORIAS,
     IMPACTOS,
     UBICACIONES,
+    ErrorEstado,
+    ErrorNoEncontrada,
     ErrorPermiso,
     ErrorValidacion,
     calcular_prioridad,
@@ -74,3 +77,64 @@ def registrar_incidencia(datos, usuario, reloj):
         registrar_evento(conn, cursor.lastrowid, usuario["id"], "REGISTRAR", None, "REGISTRADA", ahora)
 
     return {"id": cursor.lastrowid, "codigo": codigo, "prioridad": prioridad}
+
+
+# ---------------------------------------------------------------- S02 ----
+
+def listar_por_asignar():
+    """Incidencias REGISTRADAS, de la más antigua a la más reciente."""
+    return get_db().execute(
+        "SELECT codigo, ubicacion, categoria, prioridad, creada_en FROM incidencias"
+        " WHERE estado = 'REGISTRADA' ORDER BY id"
+    ).fetchall()
+
+
+def listar_tecnicos_activos():
+    return get_db().execute(
+        "SELECT id, nombre_usuario FROM usuarios WHERE rol = 'TECNICO' AND activo = 1"
+        " ORDER BY nombre_usuario"
+    ).fetchall()
+
+
+def asignar_incidencia(codigo, tecnico_id, usuario, reloj):
+    """Asigna una incidencia REGISTRADA a un técnico activo (S02).
+
+    Las verificaciones se hacen dentro de la transacción para que nadie cambie
+    el estado entre la comprobación y la escritura.
+    """
+    if usuario is None or usuario["rol"] != "COORDINADOR":
+        raise ErrorPermiso("Solo el coordinador puede asignar incidencias")
+    try:
+        tecnico_id = int(tecnico_id)
+    except (TypeError, ValueError):
+        raise ErrorValidacion("Selecciona un técnico válido") from None
+
+    ahora = fecha_iso(reloj.ahora())
+    with transaccion() as conn:
+        incidencia = conn.execute(
+            "SELECT id, estado FROM incidencias WHERE codigo = ?", (codigo,)
+        ).fetchone()
+        if incidencia is None:
+            raise ErrorNoEncontrada("Incidencia no encontrada")
+        if incidencia["estado"] != "REGISTRADA":
+            raise ErrorEstado(
+                f"Solo se puede asignar una incidencia REGISTRADA; esta está {incidencia['estado']}"
+            )
+        tecnico = conn.execute(
+            "SELECT id, rol, activo FROM usuarios WHERE id = ?", (tecnico_id,)
+        ).fetchone()
+        if tecnico is None or tecnico["rol"] != "TECNICO":
+            raise ErrorValidacion("Selecciona un técnico válido")
+        if tecnico["activo"] != 1:
+            raise ErrorValidacion("El técnico seleccionado está inactivo")
+
+        conn.execute(
+            "INSERT INTO asignaciones (incidencia_id, coordinador_id, tecnico_id, asignada_en)"
+            " VALUES (?, ?, ?, ?)",
+            (incidencia["id"], usuario["id"], tecnico["id"], ahora),
+        )
+        conn.execute(
+            "UPDATE incidencias SET estado = 'ASIGNADA' WHERE id = ? AND estado = 'REGISTRADA'",
+            (incidencia["id"],),
+        )
+        registrar_evento(conn, incidencia["id"], usuario["id"], "ASIGNAR", "REGISTRADA", "ASIGNADA", ahora)
