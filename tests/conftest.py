@@ -17,3 +17,8 @@ def app(tmp_path):
 def conn(app):
     with app.app_context():
         yield get_db()
+
+
+@pytest.fixture
+def client(app):
+    return app.test_client()
