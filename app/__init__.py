@@ -10,13 +10,16 @@ from .reloj import RelojSistema
 
 def create_app(test_config=None):
     app = Flask(__name__, instance_relative_config=True)
+    secret_key = os.environ.get("SECRET_KEY")
+    if os.environ.get("APP_ENV", "development").lower() == "production" and not secret_key:
+        raise RuntimeError("En producción debes configurar SECRET_KEY con un valor aleatorio fuera del repositorio.")
     app.config.from_mapping(
-        SECRET_KEY=os.environ.get("SECRET_KEY", "solo-desarrollo-local"),
+        SECRET_KEY=secret_key or "solo-desarrollo-local",
         DATABASE=os.path.join(app.instance_path, "reparacampus.sqlite"),
         RELOJ=RelojSistema(),
         SESSION_COOKIE_HTTPONLY=True,
         SESSION_COOKIE_SAMESITE="Lax",
-        SESSION_COOKIE_SECURE=os.environ.get("FLASK_ENV") == "production",
+        SESSION_COOKIE_SECURE=os.environ.get("APP_ENV", "development").lower() == "production",
         CSRF_ENABLED=True,
     )
     if test_config:
