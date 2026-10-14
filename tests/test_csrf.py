@@ -30,7 +30,7 @@ def test_login_rechaza_post_sin_token_csrf(tmp_path):
         "contrasena": "Solicitante1*2026",
     })
     assert respuesta.status_code == 400
-    assert "csrf" in respuesta.get_data(as_text=True).lower()
+    assert "sesión del formulario expiró" in respuesta.get_data(as_text=True).lower()
 
 
 def test_login_acepta_token_csrf_de_sesion(tmp_path):
