@@ -6,6 +6,7 @@
   <p class="ayuda">Ingresa con tu cuenta asignada.</p>
   {% if error %}<p class="error" role="alert">{{ error }}</p>{% endif %}
   <form method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <label for="usuario">Usuario</label>
     <input id="usuario" name="usuario" value="{{ usuario or '' }}" autocomplete="username" required autofocus>
     <label for="contrasena">Contraseña</label>
