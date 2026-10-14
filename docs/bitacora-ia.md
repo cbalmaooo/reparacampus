@@ -72,7 +72,7 @@ Además de los commits documentales enumerados arriba, esta rama incorpora:
 - Pruebas CSRF: `tests/test_csrf.py` — `7a95089956da209c7005d4516bd329dd0316a13d`; configuración de fixtures — `1beeab3008d6559b567ec174a2cc96df4c27b4e7`; página HTTP 400 — `c597834872dd4610c78a13fa30a4c43bb851e99a`.
 - README de seguridad: `5d0830cafa448b5a3f1dbe1e1b34613cfa7aa919`; CI — `972c38a9806d40bbef7fc8952db1e212f69b0688`.
 
-**Estado de validación:** no se pudo ejecutar pytest desde el entorno de revisión porque no hubo conectividad de red para clonar el repositorio. No declarar los cambios probados hasta que GitHub Actions o una ejecución local real confirme el resultado.
+**Estado de validación:** GitHub Actions ejecutó la suite sobre el commit `9dda2e14a5795a6dcd086bc318949fdeab611f4a`; la corrida [38506878173](https://github.com/cbalmaooo/reparacampus/actions/runs/38506878173) terminó correctamente con **159 pruebas aprobadas, 0 fallidas, en 27,81 segundos**. La ejecución local no se pudo realizar desde este entorno por falta de conectividad para clonar el repositorio. Volver a ejecutar CI si se modifica el código después de ese commit.
 
 ## Pendientes humanos para cerrar la bitácora
 
