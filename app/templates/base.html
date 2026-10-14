@@ -13,6 +13,7 @@
       <div class="sesion">
         <span>{{ g.usuario['nombre_usuario'] }} <small>({{ g.usuario['rol']|lower }})</small></span>
         <form method="post" action="{{ url_for('auth.logout') }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
           <button type="submit" class="boton-secundario">Cerrar sesión</button>
         </form>
       </div>
