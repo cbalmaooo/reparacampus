@@ -20,10 +20,12 @@
   {% if r['estado'] == 'PENDIENTE_VALIDACION' %}
   <div class="acciones">
     <form method="post" action="{{ url_for('incidencias.confirmar', codigo=r['codigo']) }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
       <p>¿El daño quedó resuelto?</p>
       <button type="submit">Confirmar solución</button>
     </form>
     <form method="post" action="{{ url_for('incidencias.rechazar', codigo=r['codigo']) }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
       <label for="rechazar-{{ r['codigo'] }}">Motivo del rechazo</label>
       <textarea id="rechazar-{{ r['codigo'] }}" name="motivo" rows="2" minlength="10" maxlength="300" required>{{ borrador.get('rechazar-' ~ r['codigo']) or '' }}</textarea>
       <button type="submit" class="boton-alterno">Rechazar solución</button>
@@ -31,6 +33,7 @@
   </div>
   {% elif r['estado'] == 'CERRADA' and r['reabrir_hasta'] %}
     <form method="post" action="{{ url_for('incidencias.reabrir', codigo=r['codigo']) }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
       <label for="reabrir-{{ r['codigo'] }}">¿El daño volvió a aparecer? Motivo de la reapertura</label>
       <textarea id="reabrir-{{ r['codigo'] }}" name="motivo" rows="2" minlength="10" maxlength="300" required>{{ borrador.get('reabrir-' ~ r['codigo']) or '' }}</textarea>
       <p class="ayuda">Puedes reabrirla hasta {{ r['reabrir_hasta'][:16]|replace('T', ' ') }} UTC.</p>
