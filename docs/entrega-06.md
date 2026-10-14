@@ -77,7 +77,7 @@ Otros supuestos documentados son usar la hora UTC del servidor, recortar espacio
 
 ### 3.5 Límites del prototipo
 
-La versión evaluada es una aplicación web Flask con base de datos SQLite y cuentas ficticias cargadas mediante seed. El alcance excluye creación de usuarios, recuperación de contraseña, edición de perfiles, adjuntos, notificaciones, exportación de reportes y búsqueda de texto libre. La protección CSRF se añadió en la rama de correcciones; debe confirmarse mediante CI y pruebas HTTP antes de considerarla verificada. No se debe describir el prototipo como un sistema desplegado en producción.
+La versión evaluada es una aplicación web Flask con base de datos SQLite y cuentas ficticias cargadas mediante seed. El alcance excluye creación de usuarios, recuperación de contraseña, edición de perfiles, adjuntos, notificaciones, exportación de reportes y búsqueda de texto libre. La protección CSRF se implementó y su middleware pasó la suite en el commit `9dda2e14a5795a6dcd086bc318949fdeab611f4a` (159 pruebas, 27,81 s). Se añadió después una prueba HTTP adicional para una acción de negocio real; la nueva suite debe quedar verificada en el SHA actualizado del PR. No se debe describir el prototipo como un sistema desplegado en producción.
 ## 4. Cinco SPECS
 
 Las especificaciones fuente están en la carpeta `specs/`. Los estados que se muestran aquí corresponden a los encabezados consultados el 13 de octubre de 2026; se deben volver a comprobar al congelar la versión de entrega.
@@ -313,7 +313,7 @@ Para cada intervención registrar objetivo/contexto, prompt real, salida relevan
 | Listado por rol, detalle, filtros combinados, tablero e historial completo | S05; AC-S05-03 a AC-S05-18 | `app/rutas_incidencias.py`: listado, detalle, historial y tablero; `app/servicios.py`: `listar_incidencias()`, `obtener_detalle()`, `calcular_tablero()` | `tests/test_s05_consultas.py`; `tests/test_integracion.py` | Implementación y pruebas presentes en el commit de integración; suite aprobada |
 | Historial inmutable y ausencia de eventos en operaciones rechazadas | S05; AC-S05-10 a AC-S05-12 | `app/historial.py`, `database/schema.sql` | `tests/test_schema.py`: `test_historial_y_cierres_inmutables`, `test_accion_de_evento_no_permitida`; `tests/test_s03_atencion.py` y `tests/test_s04_validacion.py` verifican operaciones rechazadas sin cambios/eventos | Suite aprobada; restricciones de persistencia y rechazos de los flujos están cubiertos |
 
-**Lectura de la matriz:** los resultados citados corresponden al commit de integración del PR #16, no a una ejecución aislada de la rama documental. La suite cubre los cinco SPECS y las tres pruebas de integración. La limitación conocida indicada en el README de esa versión es la ausencia de token CSRF en los formularios.
+**Lectura de la matriz:** la evidencia histórica de 154 pruebas corresponde al commit de integración del PR #16. La evidencia de seguridad más reciente previa a la nueva prueba HTTP corresponde a `9dda2e14a5795a6dcd086bc318949fdeab611f4a` y cubre 159 pruebas, incluida la validación CSRF de tokens ausentes e inválidos, logout y secreto de producción. La prueba nueva de registro autenticado se debe validar en CI sobre el SHA actualizado del PR.
 
 ### 7.2 Matriz SPEC → artefactos de implementación
 
@@ -380,7 +380,7 @@ Se añadió el flujo `.github/workflows/tests.yml` en esta rama para ejecutar `p
 |---|---|---|---|---|---|---|
 | R01 (IA) | Una sugerencia de IA puede inventar una transición o regla no exigida por el enunciado. | El sistema podría incumplir una SPEC aunque parezca coherente. | Contrastar cada sugerencia con enunciado y criterios de aceptación; registrar decisión humana y enlazarla con pruebas. | Revisor de SPECS; asignación individual pendiente de confirmar. | carpeta specs/, docs/bitacora-ia.md, pruebas por AC. | Control definido; decisiones humanas pendientes de documentar |
 | R02 (IA) | Las pruebas sugeridas por IA podrían reproducir el mismo error de la implementación. | La suite puede pasar sin detectar un defecto real. | Escribir resultados esperados manualmente a partir de las SPECS y revisar límites, permisos, persistencia y efectos laterales. | Responsable de pruebas; asignación individual pendiente de confirmar. | tests/, criterios AC y ejecución de CI. | Suite existente; revisión independiente pendiente de documentar |
-| R03 (producto) | Un formulario mutable sin token CSRF puede ser activado desde una sesión autenticada. | Cambio de estado no solicitado por el usuario. | La rama fix/pendientes-entrega-06 incorpora tokens CSRF en formularios POST y middleware para validar POST/PUT/PATCH/DELETE; se añadieron pruebas para token ausente, inválido y válido. | Equipo de implementación; asignación individual pendiente de confirmar. | app/__init__.py, app/templates/, tests/test_csrf.py. | Implementado en la rama; pendiente de CI y revisión |
+| R03 (producto) | Una sesión autenticada podría ser inducida a enviar una acción mutable. | Cambio de estado no solicitado por el usuario. | El middleware valida POST/PUT/PATCH/DELETE y los formularios incluyen token CSRF. Las pruebas cubren token ausente e inválido, logout protegido y, con el nuevo caso, registro HTTP real con token válido. | Equipo de implementación; asignación individual pendiente de confirmar. | `app/__init__.py`, `app/templates/`, `tests/test_csrf.py`. | Protección implementada; suite actualizada pendiente de CI |
 | R04 (integridad) | Una modificación futura puede separar el cambio de estado de su evento de auditoría. | Historial incompleto o inconsistente. | Mantener ambos cambios en una transacción y probar rollback ante errores; conservar restricciones y triggers de inmutabilidad. | Responsable de persistencia; asignación individual pendiente de confirmar. | app/db.py, app/historial.py, database/schema.sql, pruebas S01–S04 y de esquema. | Controles existentes; revalidar en el SHA final |
 
 ## 9. Entrega reproducible
@@ -449,11 +449,11 @@ Las contraseñas se almacenan como hashes en la base de datos; las credenciales 
 python -m pytest -v
 ```
 
-En GitHub Actions, la rama de correcciones ejecutó `python -m pytest -v` con Python 3.12 y obtuvo 159 pruebas aprobadas sobre el commit `9dda2e14a5795a6dcd086bc318949fdeab611f4a` ([corrida 38506878173](https://github.com/cbalmaooo/reparacampus/actions/runs/38506878173)). Repetirlo tras cualquier cambio adicional y sobre el SHA exacto que se etiquete como `release-examen`.
+En GitHub Actions, `python -m pytest -v` obtuvo 159 pruebas aprobadas en 27,81 s sobre el commit `9dda2e14a5795a6dcd086bc318949fdeab611f4a` ([corrida 38506878173](https://github.com/cbalmaooo/reparacampus/actions/runs/38506878173)). Esa ejecución es la línea base de la protección CSRF. Tras añadir una prueba HTTP de registro real, se requiere una nueva ejecución completa sobre el SHA actualizado de este PR; no atribuir a la nueva prueba el resultado de la ejecución anterior.
 
 ### 9.7 Limitaciones conocidas
 
-- La rama `fix/pendientes-entrega-06` añade token CSRF a los formularios POST y pruebas para token ausente, inválido y válido. El resultado de CI de esta rama aún debe comprobarse.
+- La rama `fix/pendientes-entrega-06` añade token CSRF a formularios mutables. La corrida 38506878173 validó 159 pruebas sobre el commit `9dda2e14a5795a6dcd086bc318949fdeab611f4a`. La prueba adicional de registro de incidencia con token válido y sesión autenticada debe validarse mediante la suite completa sobre el SHA actual del PR.
 - No se incluyen registro de usuarios, recuperación de contraseñas, edición de perfiles, adjuntos, notificaciones, exportación ni búsqueda de texto libre.
 - La ejecución de CI acredita las pruebas automatizadas de ese commit; la versión final debe probarse de nuevo después de etiquetarla.
 - La documentación independiente del modelo de datos requiere alineación con el esquema SQL antes de cerrar la entrega.
@@ -493,7 +493,8 @@ En GitHub Actions, la rama de correcciones ejecutó `python -m pytest -v` con Py
 - [ ] Confirmar título oficial del caso y grupo, si el aula los exige.
 - [ ] Completar decisiones humanas, limitaciones y verificaciones reales de la bitácora de IA; no inventar prompts ni resultados.
 - [ ] Asignar responsables de riesgos y completar contribuciones con evidencia real.
-- [x] Ejecutar en CI la protección CSRF añadida en `fix/pendientes-entrega-06` (159 pruebas aprobadas en el commit documentado); revisar de nuevo si se modifica el código.
+- [x] Validar en CI la protección CSRF base: 159 pruebas aprobadas en 27,81 s en `9dda2e14a5795a6dcd086bc318949fdeab611f4a`.
+- [ ] Validar en CI la prueba HTTP de registro autenticado con token válido, junto con la suite completa, en el SHA actualizado del PR.
 - [ ] Contribuciones basadas en trabajo y commits reales.
 - [ ] PDF A4, márgenes de 2,5 cm, fuente 11–12 pt e interlineado 1,15.
 - [ ] Texto seleccionable, enlaces activos y figuras/tablas numeradas.
