@@ -12,6 +12,7 @@
 {% endif %}
 
 <form method="post" action="{{ url_for('incidencias.crear') }}" class="formulario">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
   <label for="ubicacion">Ubicación</label>
   <select id="ubicacion" name="ubicacion" required>
     <option value="">Selecciona…</option>

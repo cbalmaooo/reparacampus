@@ -77,7 +77,7 @@ Otros supuestos documentados son usar la hora UTC del servidor, recortar espacio
 
 ### 3.5 Límites del prototipo
 
-La versión evaluada es una aplicación web Flask con base de datos SQLite y cuentas ficticias cargadas mediante seed. El alcance excluye creación de usuarios, recuperación de contraseña, edición de perfiles, adjuntos, notificaciones, exportación de reportes y búsqueda de texto libre. El README identifica como limitación conocida la ausencia de token CSRF en los formularios. No se debe describir el prototipo como un sistema desplegado en producción.
+La versión evaluada es una aplicación web Flask con base de datos SQLite y cuentas ficticias cargadas mediante seed. El alcance excluye creación de usuarios, recuperación de contraseña, edición de perfiles, adjuntos, notificaciones, exportación de reportes y búsqueda de texto libre. La protección CSRF y la prueba HTTP de una acción de negocio real están verificadas: la suite completa pasó con 160 pruebas en el SHA actual documentado en la sección 7.5. La ejecución base de 159 pruebas en `9dda2e14a5795a6dcd086bc318949fdeab611f4a` sigue siendo evidencia histórica. Los commits `b7c32d2091622179c30f4f2e2e82e00d418b1f12` y `c626e6787a1b90409432ac0049e22794ccfaf2a0` fueron solo actualizaciones documentales; posteriormente se añadió la prueba HTTP y se volvió a ejecutar la suite completa. No se debe describir el prototipo como un sistema desplegado en producción.
 ## 4. Cinco SPECS
 
 Las especificaciones fuente están en la carpeta `specs/`. Los estados que se muestran aquí corresponden a los encabezados consultados el 13 de octubre de 2026; se deben volver a comprobar al congelar la versión de entrega.
@@ -94,7 +94,7 @@ Las especificaciones fuente están en la carpeta `specs/`. Los estados que se mu
 
 ### 4.2 S02 — Priorizar y asignar una incidencia
 - **Requisito relacionado:** RF02.
-- **Versión/estado en la SPEC:** 0.2 — En revisión.
+- **Versión/estado en la SPEC:** 1.0 — Aprobada (coincide con `specs/S02-asignacion.md`).
 - **Historia de usuario:** como coordinador, disponer de una prioridad calculada por el sistema y asignar la incidencia a un técnico activo.
 - **Reglas clave:** riesgo para personas implica prioridad CRITICA; sin riesgo, impacto ALTO implica ALTA y BAJO implica NORMAL. Solo el coordinador asigna incidencias en estado REGISTRADA a técnicos existentes, activos y con rol TECNICO. La asignación cambia el estado a ASIGNADA y registra el evento en una transacción.
 - **Criterios verificables:** comprobar las tres reglas de prioridad, asignación válida y rechazos por rol, estado o técnico inválido/inactivo, sin efectos parciales.
@@ -155,7 +155,7 @@ La separación permite probar reglas y servicios sin depender de la interfaz, y 
 
 ### 5.2 Modelo de datos
 
-El esquema SQL de referencia utiliza las entidades siguientes. El diagrama se expresa aquí en relación con `database/schema.sql`; el archivo independiente `docs/modelo-datos.md` aún debe alinearse antes de considerar cerrada la documentación del modelo.
+El esquema SQL de referencia utiliza las entidades siguientes. El diagrama se expresa aquí en relación con `database/schema.sql`; el archivo independiente [docs/modelo-datos.md](modelo-datos.md) ya se alineó con el esquema actual. Volver a comprobarlo si cambia `database/schema.sql`.
 
 ```mermaid
 erDiagram
@@ -313,7 +313,7 @@ Para cada intervención registrar objetivo/contexto, prompt real, salida relevan
 | Listado por rol, detalle, filtros combinados, tablero e historial completo | S05; AC-S05-03 a AC-S05-18 | `app/rutas_incidencias.py`: listado, detalle, historial y tablero; `app/servicios.py`: `listar_incidencias()`, `obtener_detalle()`, `calcular_tablero()` | `tests/test_s05_consultas.py`; `tests/test_integracion.py` | Implementación y pruebas presentes en el commit de integración; suite aprobada |
 | Historial inmutable y ausencia de eventos en operaciones rechazadas | S05; AC-S05-10 a AC-S05-12 | `app/historial.py`, `database/schema.sql` | `tests/test_schema.py`: `test_historial_y_cierres_inmutables`, `test_accion_de_evento_no_permitida`; `tests/test_s03_atencion.py` y `tests/test_s04_validacion.py` verifican operaciones rechazadas sin cambios/eventos | Suite aprobada; restricciones de persistencia y rechazos de los flujos están cubiertos |
 
-**Lectura de la matriz:** los resultados citados corresponden al commit de integración del PR #16, no a una ejecución aislada de la rama documental. La suite cubre los cinco SPECS y las tres pruebas de integración. La limitación conocida indicada en el README de esa versión es la ausencia de token CSRF en los formularios.
+**Lectura de la matriz:** la evidencia histórica de 154 pruebas corresponde al commit de integración del PR #16. La ejecución de 159 pruebas en `9dda2e14a5795a6dcd086bc318949fdeab611f4a` cubrió token CSRF ausente/inválido, logout y secreto de producción. Después se añadió una prueba HTTP de registro autenticado con token válido; la suite completa actualizada aprobó 160 pruebas en el SHA indicado en la sección 7.5.
 
 ### 7.2 Matriz SPEC → artefactos de implementación
 
@@ -355,7 +355,11 @@ Las tres pruebas de integración que aparecen en el registro de GitHub Actions u
 
 ### 7.5 Ejecución, hallazgos y regresión
 
-**Evidencia de ejecución actual disponible:** la corrida de GitHub Actions [38473858776](https://github.com/cbalmaooo/reparacampus/actions/runs/38473858776) terminó con conclusión `success`. El log indica:
+**Ejecución completa actual del PR:** GitHub Actions ejecutó `python -m pytest -v` con Python 3.12 sobre el SHA `d97227651fe6da086e7a942b038637409f72cb0a`, corrida [38507542613](https://github.com/cbalmaooo/reparacampus/actions/runs/38507542613). Resultado: **160 passed, 0 failed, en 27,74 s**. Esta ejecución incluye la nueva prueba HTTP `test_registrar_incidencia_acepta_token_csrf_valido_con_sesion_autenticada`, que inicia sesión, obtiene un token CSRF de la sesión y registra una incidencia real; comprueba redirección, estado, prioridad y evento de auditoría.
+
+**Evidencia base anterior:** el commit `9dda2e14a5795a6dcd086bc318949fdeab611f4a`, corrida [38506878173](https://github.com/cbalmaooo/reparacampus/actions/runs/38506878173), obtuvo 159 pruebas aprobadas en 27,81 s. Los commits `b7c32d2091622179c30f4f2e2e82e00d418b1f12` y `c626e6787a1b90409432ac0049e22794ccfaf2a0` posteriores a esa base fueron solo documentales; después se agregó la prueba HTTP y se volvió a ejecutar la suite completa sobre el nuevo SHA.
+
+**Evidencia histórica de integración anterior:** la corrida [38473858776](https://github.com/cbalmaooo/reparacampus/actions/runs/38473858776) terminó con conclusión `success`. El log indica:
 
 - **Comando:** `python -m pytest -v`.
 - **Entorno:** Ubuntu 24.04.5, Python 3.12.15, pytest 8.3.3.
@@ -370,16 +374,17 @@ Las tres pruebas de integración que aparecen en el registro de GitHub Actions u
 
 Se añadió el flujo `.github/workflows/tests.yml` en esta rama para ejecutar `python -m pytest -v` con Python 3.12 al actualizar la rama de trabajo o abrir/actualizar un pull request hacia `main`. Enlace: [flujo de pruebas](.github/workflows/tests.yml).
 
-**Resultado verificado:** [ejecución 38473858776](https://github.com/cbalmaooo/reparacampus/actions/runs/38473858776) — `success`, 154 pruebas aprobadas. El commit de integración evaluado fue `2d51d8ff5ff50a4b8d87a2cf92c3ed23ea942d5a`. Antes de la entrega final, volver a ejecutar la suite contra el SHA etiquetado como `release-examen`.
+**Resultado actual verificado para el PR #22:** [ejecución 38507542613](https://github.com/cbalmaooo/reparacampus/actions/runs/38507542613) — `success`, **160 pruebas aprobadas en 27,74 s**, comando `python -m pytest -v`, SHA probado `d97227651fe6da086e7a942b038637409f72cb0a`. Esta ejecución incluye la nueva prueba HTTP de registro autenticado con token CSRF válido. Los commits posteriores `70c3bec456f3b6849a42fa456280666ffbe015e3` y `fc50e706c2aa3eb7c18e2374dafa0ead9d1ee57b` modifican únicamente esta documentación, no el código probado. La corrida anterior [38473858776](https://github.com/cbalmaooo/reparacampus/actions/runs/38473858776), con 154 pruebas sobre `2d51d8ff5ff50a4b8d87a2cf92c3ed23ea942d5a`, queda como evidencia histórica. Antes de la entrega final, volver a ejecutar la suite contra el SHA etiquetado como `release-examen`.
 
 ## 8. Riesgos
 
 | ID | Riesgo/causa | Impacto | Control verificable | Responsable | Evidencia | Estado |
 |---|---|---|---|---|---|---|
-| R01 | Los formularios no tienen token CSRF, limitación reconocida en el README. | Una solicitud no deseada podría intentar ejecutar una acción desde una sesión autenticada. | Mantener la cookie `SameSite=Lax`, documentar la limitación y no presentar la versión como producción; valorar token CSRF como trabajo futuro. | Equipo Equihire; asignación individual pendiente de confirmar. | README de la versión de integración; rutas POST en `app/rutas_incidencias.py`. | Limitación conocida |
-| R02 | Un permiso aplicado solo en la interfaz permitiría acceso indebido si no se valida en el servidor. | Exposición o modificación de incidencias de otros usuarios. | Decoradores por rol, validación de propiedad en servicios y pruebas de acceso por rol/registro. | Equipo Equihire; asignación individual pendiente de confirmar. | `app/auth.py`, `app/servicios.py`, `tests/test_auth.py`, `tests/test_s05_consultas.py`. | Controles y pruebas presentes; suite CI aprobada |
-| R03 | Una operación que no sea atómica podría guardar el estado sin su evento o solución. | Historial inconsistente y dificultad para auditar la incidencia. | Usar transacciones; mantener restricciones y triggers en SQLite; probar que las operaciones rechazadas no dejan cambios parciales. | Equipo Equihire; asignación individual pendiente de confirmar. | `app/db.py`, `app/historial.py`, `database/schema.sql`, pruebas S01–S04 y de esquema. | Controles y pruebas presentes; suite CI aprobada |
-| R04 | Documentos técnicos o instrucciones de instalación pueden quedar desactualizados respecto del esquema o del commit evaluado. | El evaluador podría reproducir una versión distinta o interpretar mal el modelo. | Alinear el modelo de datos con `database/schema.sql`, registrar el SHA/tag final y volver a ejecutar pruebas sobre esa versión exacta. | Equipo Equihire; asignación individual pendiente de confirmar. | `docs/modelo-datos.md`, `README.md`, sección 9 de este informe y ejecución de GitHub Actions. | Pendiente de cierre documental |
+| R01 (IA) | Una sugerencia de IA puede inventar una transición o regla no exigida por el enunciado. | El sistema podría incumplir una SPEC aunque parezca coherente. | Contrastar cada sugerencia con enunciado y criterios de aceptación; registrar decisión humana y enlazarla con pruebas. | Revisor de SPECS; asignación individual pendiente de confirmar. | carpeta specs/, docs/bitacora-ia.md, pruebas por AC. | Control definido; decisiones humanas pendientes de documentar |
+| R02 (IA) | Las pruebas sugeridas por IA podrían reproducir el mismo error de la implementación. | La suite puede pasar sin detectar un defecto real. | Escribir resultados esperados manualmente a partir de las SPECS y revisar límites, permisos, persistencia y efectos laterales. | Responsable de pruebas; asignación individual pendiente de confirmar. | tests/, criterios AC y ejecución de CI. | Suite existente; revisión independiente pendiente de documentar |
+| R03 (producto) | Una sesión autenticada podría ser inducida a enviar una acción mutable. | Cambio de estado no solicitado por el usuario. | El middleware valida POST/PUT/PATCH/DELETE y los formularios incluyen token CSRF. Las pruebas cubren token ausente e inválido, logout protegido y registro HTTP real con token válido. | Equipo de implementación; asignación individual pendiente de confirmar. | `app/__init__.py`, `app/templates/`, `tests/test_csrf.py`. | Verificado en CI: 160 pruebas aprobadas en el SHA de la sección 7.5 |
+| R04 (integridad) | Una modificación futura puede separar el cambio de estado de su evento de auditoría. | Historial incompleto o inconsistente. | Mantener ambos cambios en una transacción y probar rollback ante errores; conservar restricciones y triggers de inmutabilidad. | Responsable de persistencia; asignación individual pendiente de confirmar. | app/db.py, app/historial.py, database/schema.sql, pruebas S01–S04 y de esquema. | Controles existentes; revalidar en el SHA final |
+
 ## 9. Entrega reproducible
 ### 9.1 Repositorio y versión
 - URL: https://github.com/cbalmaooo/reparacampus
@@ -446,11 +451,11 @@ Las contraseñas se almacenan como hashes en la base de datos; las credenciales 
 python -m pytest -v
 ```
 
-En GitHub Actions se ejecutó ese comando con Python 3.12.15 y pytest 8.3.3; el commit de integración documentado en la sección 7 obtuvo 154 pruebas aprobadas. Repetirlo después de clonar la versión final y registrar el resultado y el SHA exacto. No confundir el resultado del commit de integración del PR con el resultado de un futuro tag `release-examen`.
+En GitHub Actions se ejecutó `python -m pytest -v` con Python 3.12. Resultado actual: **160 passed in 27.74s**, SHA `d97227651fe6da086e7a942b038637409f72cb0a`, corrida [38507542613](https://github.com/cbalmaooo/reparacampus/actions/runs/38507542613). La prueba HTTP de registro autenticado con CSRF válido está incluida en esa ejecución.
 
 ### 9.7 Limitaciones conocidas
 
-- Los formularios no tienen token CSRF; el README registra la cookie `SameSite=Lax` como mitigación parcial.
+- La protección CSRF y la acción HTTP real de registro con token válido están cubiertas por la suite completa: 160 pruebas aprobadas en 27,74 s sobre `d97227651fe6da086e7a942b038637409f72cb0a` (corrida [38507542613](https://github.com/cbalmaooo/reparacampus/actions/runs/38507542613)).
 - No se incluyen registro de usuarios, recuperación de contraseñas, edición de perfiles, adjuntos, notificaciones, exportación ni búsqueda de texto libre.
 - La ejecución de CI acredita las pruebas automatizadas de ese commit; la versión final debe probarse de nuevo después de etiquetarla.
 - La documentación independiente del modelo de datos requiere alineación con el esquema SQL antes de cerrar la entrega.
@@ -486,7 +491,11 @@ En GitHub Actions se ejecutó ese comando con Python 3.12.15 y pytest 8.3.3; el 
 - [ ] Hallazgos y regresión documentados.
 - [ ] Cuatro riesgos con responsables, controles y evidencias.
 - [ ] README con instalación, arranque, seed, cuentas ficticias y pruebas.
-- [ ] Tag release-examen y SHA verificados.
+- [ ] Tag `release-examen` y SHA verificados después de ejecutar las pruebas sobre el commit final.
+- [ ] Confirmar título oficial del caso y grupo, si el aula los exige.
+- [ ] Completar decisiones humanas, limitaciones y verificaciones reales de la bitácora de IA; no inventar prompts ni resultados.
+- [ ] Asignar responsables de riesgos y completar contribuciones con evidencia real.
+- [x] Validar en CI la protección CSRF y la prueba HTTP de registro autenticado con token válido: 160 pruebas aprobadas en 27,74 s, SHA `d97227651fe6da086e7a942b038637409f72cb0a`, corrida [38507542613](https://github.com/cbalmaooo/reparacampus/actions/runs/38507542613).
 - [ ] Contribuciones basadas en trabajo y commits reales.
 - [ ] PDF A4, márgenes de 2,5 cm, fuente 11–12 pt e interlineado 1,15.
 - [ ] Texto seleccionable, enlaces activos y figuras/tablas numeradas.

@@ -28,6 +28,7 @@ def reloj():
 def app(tmp_path, reloj):
     app = create_app({
         "TESTING": True,
+        "CSRF_ENABLED": False,  # Las pruebas de flujos prueban negocio; test_csrf valida el control HTTP real.
         "DATABASE": str(tmp_path / "prueba.sqlite"),
         "RELOJ": reloj,
     })

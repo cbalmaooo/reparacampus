@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block titulo %}Solicitud no válida · ReparaCampus{% endblock %}
+{% block contenido %}
+<h1>Solicitud no válida</h1>
+<p class="error" role="alert">{{ mensaje or "La solicitud no es válida o el token de seguridad expiró." }}</p>
+<p>Recarga la página e inténtalo de nuevo.</p>
+<p><a href="{{ url_for('inicio') }}">Volver al inicio</a></p>
+{% endblock %}

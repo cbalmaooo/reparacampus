@@ -22,6 +22,7 @@
       <td>{{ inc['creada_en'][:16]|replace('T', ' ') }} UTC</td>
       <td>
         <form method="post" action="{{ url_for('incidencias.asignar', codigo=inc['codigo']) }}" class="form-en-linea">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
           <label class="visualmente-oculto" for="tecnico-{{ inc['codigo'] }}">Técnico para {{ inc['codigo'] }}</label>
           <select id="tecnico-{{ inc['codigo'] }}" name="tecnico_id" required>
             <option value="">Técnico…</option>
