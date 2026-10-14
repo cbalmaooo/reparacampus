@@ -355,7 +355,9 @@ Las tres pruebas de integración que aparecen en el registro de GitHub Actions u
 
 ### 7.5 Ejecución, hallazgos y regresión
 
-**Evidencia de ejecución actual disponible:** la corrida de GitHub Actions [38473858776](https://github.com/cbalmaooo/reparacampus/actions/runs/38473858776) terminó con conclusión `success`. El log indica:
+**Evidencia de esta rama de correcciones:** GitHub Actions ejecutó la suite sobre el commit `9dda2e14a5795a6dcd086bc318949fdeab611f4a` en la corrida [38506878173](https://github.com/cbalmaooo/reparacampus/actions/runs/38506878173). Resultado observado: **159 pruebas aprobadas, 0 fallidas, en 27,81 segundos**. Incluye las nuevas pruebas de CSRF y configuración de secreto de producción.
+
+**Evidencia histórica de integración anterior:** la corrida [38473858776](https://github.com/cbalmaooo/reparacampus/actions/runs/38473858776) terminó con conclusión `success`. El log indica:
 
 - **Comando:** `python -m pytest -v`.
 - **Entorno:** Ubuntu 24.04.5, Python 3.12.15, pytest 8.3.3.
@@ -447,7 +449,7 @@ Las contraseñas se almacenan como hashes en la base de datos; las credenciales 
 python -m pytest -v
 ```
 
-En GitHub Actions se ejecutó ese comando con Python 3.12.15 y pytest 8.3.3; el commit de integración documentado en la sección 7 obtuvo 154 pruebas aprobadas. Repetirlo después de clonar la versión final y registrar el resultado y el SHA exacto. No confundir el resultado del commit de integración del PR con el resultado de un futuro tag `release-examen`.
+En GitHub Actions, la rama de correcciones ejecutó `python -m pytest -v` con Python 3.12 y obtuvo 159 pruebas aprobadas sobre el commit `9dda2e14a5795a6dcd086bc318949fdeab611f4a` ([corrida 38506878173](https://github.com/cbalmaooo/reparacampus/actions/runs/38506878173)). Repetirlo tras cualquier cambio adicional y sobre el SHA exacto que se etiquete como `release-examen`.
 
 ### 9.7 Limitaciones conocidas
 
@@ -491,7 +493,7 @@ En GitHub Actions se ejecutó ese comando con Python 3.12.15 y pytest 8.3.3; el 
 - [ ] Confirmar título oficial del caso y grupo, si el aula los exige.
 - [ ] Completar decisiones humanas, limitaciones y verificaciones reales de la bitácora de IA; no inventar prompts ni resultados.
 - [ ] Asignar responsables de riesgos y completar contribuciones con evidencia real.
-- [ ] Verificar en CI la protección CSRF añadida en `fix/pendientes-entrega-06` y revisar que todos los formularios mutables envíen el token.
+- [x] Ejecutar en CI la protección CSRF añadida en `fix/pendientes-entrega-06` (159 pruebas aprobadas en el commit documentado); revisar de nuevo si se modifica el código.
 - [ ] Contribuciones basadas en trabajo y commits reales.
 - [ ] PDF A4, márgenes de 2,5 cm, fuente 11–12 pt e interlineado 1,15.
 - [ ] Texto seleccionable, enlaces activos y figuras/tablas numeradas.
