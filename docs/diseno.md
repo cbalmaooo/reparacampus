@@ -29,5 +29,5 @@ Flask permite mantener el prototipo web en Python con una separación sencilla e
 ## Limitaciones conocidas y trabajo pendiente
 
 - La rama de correcciones incorpora tokens CSRF en formularios y validación HTTP; falta verificar el resultado de CI y revisar el diff antes de integrar.
-- La configuración usa un secreto local por defecto si no se define `SECRET_KEY`; debe exigirse una clave de entorno fuera del modo de desarrollo.
+- La aplicación exige `SECRET_KEY` cuando `APP_ENV=production` y activa la cookie de sesión segura en ese modo. En despliegue se debe configurar un secreto aleatorio y usar HTTPS.
 - Antes de congelar la entrega, ejecutar la suite sobre el commit final, confirmar el resultado de CI y vincular el SHA y tag exactos.
