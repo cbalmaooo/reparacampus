@@ -374,7 +374,7 @@ Las tres pruebas de integración que aparecen en el registro de GitHub Actions u
 
 Se añadió el flujo `.github/workflows/tests.yml` en esta rama para ejecutar `python -m pytest -v` con Python 3.12 al actualizar la rama de trabajo o abrir/actualizar un pull request hacia `main`. Enlace: [flujo de pruebas](.github/workflows/tests.yml).
 
-**Resultado verificado:** [ejecución 38473858776](https://github.com/cbalmaooo/reparacampus/actions/runs/38473858776) — `success`, 154 pruebas aprobadas. El commit de integración evaluado fue `2d51d8ff5ff50a4b8d87a2cf92c3ed23ea942d5a`. Antes de la entrega final, volver a ejecutar la suite contra el SHA etiquetado como `release-examen`.
+**Resultado actual verificado para el PR #22:** [ejecución 38507542613](https://github.com/cbalmaooo/reparacampus/actions/runs/38507542613) — `success`, **160 pruebas aprobadas en 27,74 s**, comando `python -m pytest -v`, SHA probado `d97227651fe6da086e7a942b038637409f72cb0a`. Esta ejecución incluye la nueva prueba HTTP de registro autenticado con token CSRF válido. Los commits posteriores `70c3bec456f3b6849a42fa456280666ffbe015e3` y `fc50e706c2aa3eb7c18e2374dafa0ead9d1ee57b` modifican únicamente esta documentación, no el código probado. La corrida anterior [38473858776](https://github.com/cbalmaooo/reparacampus/actions/runs/38473858776), con 154 pruebas sobre `2d51d8ff5ff50a4b8d87a2cf92c3ed23ea942d5a`, queda como evidencia histórica. Antes de la entrega final, volver a ejecutar la suite contra el SHA etiquetado como `release-examen`.
 
 ## 8. Riesgos
 
