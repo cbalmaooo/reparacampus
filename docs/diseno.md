@@ -28,6 +28,6 @@ Flask permite mantener el prototipo web en Python con una separación sencilla e
 
 ## Limitaciones conocidas y trabajo pendiente
 
-- El README de la versión revisada registra que los formularios no tenían token CSRF. Debe corregirse y probarse antes de considerar el prototipo endurecido para despliegue.
+- La rama de correcciones incorpora tokens CSRF en formularios y validación HTTP; falta verificar el resultado de CI y revisar el diff antes de integrar.
 - La configuración usa un secreto local por defecto si no se define `SECRET_KEY`; debe exigirse una clave de entorno fuera del modo de desarrollo.
 - Antes de congelar la entrega, ejecutar la suite sobre el commit final, confirmar el resultado de CI y vincular el SHA y tag exactos.
