@@ -14,6 +14,7 @@
 
   {% if inc['estado'] == 'ASIGNADA' %}
     <form method="post" action="{{ url_for('incidencias.iniciar', codigo=inc['codigo']) }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
       <button type="submit">Iniciar atención</button>
     </form>
   {% elif inc['estado'] == 'EN_ATENCION' %}
@@ -22,6 +23,7 @@
       <blockquote>{{ inc['ultima_solucion'] }}</blockquote>
     {% endif %}
     <form method="post" action="{{ url_for('incidencias.solucion', codigo=inc['codigo']) }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
       <label for="solucion-{{ inc['codigo'] }}">Solución aplicada</label>
       <textarea id="solucion-{{ inc['codigo'] }}" name="solucion" rows="3" minlength="20" maxlength="800" required>{{ borrador.get(inc['codigo']) or '' }}</textarea>
       <p class="ayuda">Entre 20 y 800 caracteres.</p>
