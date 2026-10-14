@@ -1,6 +1,8 @@
 """Pruebas del control CSRF HTTP en la aplicación configurada con protección activa."""
 import re
 
+import pytest
+
 from app import create_app
 from app.db import init_db
 
@@ -54,3 +56,23 @@ def test_login_rechaza_token_csrf_invalido(tmp_path):
         "csrf_token": "token-falso",
     })
     assert respuesta.status_code == 400
+
+def test_solicitud_mutable_rechaza_post_sin_token_despues_de_login(tmp_path):
+    client = cliente_con_csrf(tmp_path)
+    token = token_de(client.get("/login").get_data(as_text=True))
+    assert client.post("/login", data={
+        "usuario": "solicitante1",
+        "contrasena": "Solicitante1*2026",
+        "csrf_token": token,
+    }).status_code == 302
+    respuesta = client.post("/logout")
+    assert respuesta.status_code == 400
+    # La solicitud sin token no debe cerrar la sesión autenticada.
+    assert client.get("/").status_code == 200
+
+
+def test_produccion_exige_secret_key(monkeypatch, tmp_path):
+    monkeypatch.setenv("APP_ENV", "production")
+    monkeypatch.delenv("SECRET_KEY", raising=False)
+    with pytest.raises(RuntimeError, match="SECRET_KEY"):
+        create_app({"DATABASE": str(tmp_path / "produccion.sqlite")})
