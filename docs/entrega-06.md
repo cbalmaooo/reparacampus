@@ -77,7 +77,7 @@ Otros supuestos documentados son usar la hora UTC del servidor, recortar espacio
 
 ### 3.5 Límites del prototipo
 
-La versión evaluada es una aplicación web Flask con base de datos SQLite y cuentas ficticias cargadas mediante seed. El alcance excluye creación de usuarios, recuperación de contraseña, edición de perfiles, adjuntos, notificaciones, exportación de reportes y búsqueda de texto libre. El README identifica como limitación conocida la ausencia de token CSRF en los formularios. No se debe describir el prototipo como un sistema desplegado en producción.
+La versión evaluada es una aplicación web Flask con base de datos SQLite y cuentas ficticias cargadas mediante seed. El alcance excluye creación de usuarios, recuperación de contraseña, edición de perfiles, adjuntos, notificaciones, exportación de reportes y búsqueda de texto libre. La protección CSRF se añadió en la rama de correcciones; debe confirmarse mediante CI y pruebas HTTP antes de considerarla verificada. No se debe describir el prototipo como un sistema desplegado en producción.
 ## 4. Cinco SPECS
 
 Las especificaciones fuente están en la carpeta `specs/`. Los estados que se muestran aquí corresponden a los encabezados consultados el 13 de octubre de 2026; se deben volver a comprobar al congelar la versión de entrega.
@@ -450,7 +450,7 @@ En GitHub Actions se ejecutó ese comando con Python 3.12.15 y pytest 8.3.3; el 
 
 ### 9.7 Limitaciones conocidas
 
-- Los formularios no tienen token CSRF; el README registra la cookie `SameSite=Lax` como mitigación parcial.
+- La rama `fix/pendientes-entrega-06` añade token CSRF a los formularios POST y pruebas para token ausente, inválido y válido. El resultado de CI de esta rama aún debe comprobarse.
 - No se incluyen registro de usuarios, recuperación de contraseñas, edición de perfiles, adjuntos, notificaciones, exportación ni búsqueda de texto libre.
 - La ejecución de CI acredita las pruebas automatizadas de ese commit; la versión final debe probarse de nuevo después de etiquetarla.
 - La documentación independiente del modelo de datos requiere alineación con el esquema SQL antes de cerrar la entrega.
@@ -490,7 +490,7 @@ En GitHub Actions se ejecutó ese comando con Python 3.12.15 y pytest 8.3.3; el 
 - [ ] Confirmar título oficial del caso y grupo, si el aula los exige.
 - [ ] Completar decisiones humanas, limitaciones y verificaciones reales de la bitácora de IA; no inventar prompts ni resultados.
 - [ ] Asignar responsables de riesgos y completar contribuciones con evidencia real.
-- [ ] Resolver o declarar expresamente la limitación CSRF antes de cualquier despliegue.
+- [ ] Verificar en CI la protección CSRF añadida en `fix/pendientes-entrega-06` y revisar que todos los formularios mutables envíen el token.
 - [ ] Contribuciones basadas en trabajo y commits reales.
 - [ ] PDF A4, márgenes de 2,5 cm, fuente 11–12 pt e interlineado 1,15.
 - [ ] Texto seleccionable, enlaces activos y figuras/tablas numeradas.
