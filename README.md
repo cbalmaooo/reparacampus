@@ -80,7 +80,10 @@ Cada prueba usa su propia base SQLite temporal; no toca `instance/`.
 Para guardar evidencia: `python -m pytest -v > docs/evidencias/pytest-AAAA-MM-DD.txt`
 y registrar el SHA con `git rev-parse HEAD`.
 
-## Estado y limitaciones conocidas
+## Estado y seguridad
+
+- Protección CSRF: activada para solicitudes POST/PUT/PATCH/DELETE mediante token vinculado a la sesión. Los formularios HTML incluyen el token; una solicitud sin token o con token inválido se rechaza con HTTP 400. `SameSite=Lax` y `HttpOnly` se mantienen como defensas adicionales.
+- En un despliegue real, configura `SECRET_KEY` con un secreto aleatorio fuera del repositorio y sirve la aplicación únicamente por HTTPS.
 
 - Implementado: autenticación con control de rol, S01 (registrar), S02 (asignar),
   S03 (atender y solucionar), S04 (confirmar, rechazar y reabrir en 48 h),
@@ -89,5 +92,4 @@ y registrar el SHA con `git rev-parse HEAD`.
 - Rutas principales: `/login`, `/incidencias/` (lista y filtros), `/incidencias/<código>`
   (detalle e historial), `/incidencias/nueva`, `/incidencias/mis-reportes`,
   `/incidencias/por-asignar`, `/incidencias/mis-asignaciones`, `/incidencias/tablero`.
-- Limitación conocida: los formularios no tienen token CSRF (mitigado en parte con
-  la cookie `SameSite=Lax`). No se requieren adjuntos, notificaciones ni hosting.
+- Fuera del alcance: no se requieren adjuntos, notificaciones ni hosting. El prototipo no debe considerarse listo para producción sin configuración de secretos, HTTPS y una revisión de seguridad del despliegue.
