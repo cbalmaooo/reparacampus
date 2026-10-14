@@ -94,7 +94,7 @@ Las especificaciones fuente están en la carpeta `specs/`. Los estados que se mu
 
 ### 4.2 S02 — Priorizar y asignar una incidencia
 - **Requisito relacionado:** RF02.
-- **Versión/estado en la SPEC:** 0.2 — En revisión.
+- **Versión/estado en la SPEC:** 1.0 — Aprobada (coincide con `specs/S02-asignacion.md`).
 - **Historia de usuario:** como coordinador, disponer de una prioridad calculada por el sistema y asignar la incidencia a un técnico activo.
 - **Reglas clave:** riesgo para personas implica prioridad CRITICA; sin riesgo, impacto ALTO implica ALTA y BAJO implica NORMAL. Solo el coordinador asigna incidencias en estado REGISTRADA a técnicos existentes, activos y con rol TECNICO. La asignación cambia el estado a ASIGNADA y registra el evento en una transacción.
 - **Criterios verificables:** comprobar las tres reglas de prioridad, asignación válida y rechazos por rol, estado o técnico inválido/inactivo, sin efectos parciales.
@@ -155,7 +155,7 @@ La separación permite probar reglas y servicios sin depender de la interfaz, y 
 
 ### 5.2 Modelo de datos
 
-El esquema SQL de referencia utiliza las entidades siguientes. El diagrama se expresa aquí en relación con `database/schema.sql`; el archivo independiente `docs/modelo-datos.md` aún debe alinearse antes de considerar cerrada la documentación del modelo.
+El esquema SQL de referencia utiliza las entidades siguientes. El diagrama se expresa aquí en relación con `database/schema.sql`; el archivo independiente [docs/modelo-datos.md](modelo-datos.md) ya se alineó con el esquema actual. Volver a comprobarlo si cambia `database/schema.sql`.
 
 ```mermaid
 erDiagram
@@ -486,7 +486,11 @@ En GitHub Actions se ejecutó ese comando con Python 3.12.15 y pytest 8.3.3; el 
 - [ ] Hallazgos y regresión documentados.
 - [ ] Cuatro riesgos con responsables, controles y evidencias.
 - [ ] README con instalación, arranque, seed, cuentas ficticias y pruebas.
-- [ ] Tag release-examen y SHA verificados.
+- [ ] Tag `release-examen` y SHA verificados después de ejecutar las pruebas sobre el commit final.
+- [ ] Confirmar título oficial del caso y grupo, si el aula los exige.
+- [ ] Completar decisiones humanas, limitaciones y verificaciones reales de la bitácora de IA; no inventar prompts ni resultados.
+- [ ] Asignar responsables de riesgos y completar contribuciones con evidencia real.
+- [ ] Resolver o declarar expresamente la limitación CSRF antes de cualquier despliegue.
 - [ ] Contribuciones basadas en trabajo y commits reales.
 - [ ] PDF A4, márgenes de 2,5 cm, fuente 11–12 pt e interlineado 1,15.
 - [ ] Texto seleccionable, enlaces activos y figuras/tablas numeradas.
