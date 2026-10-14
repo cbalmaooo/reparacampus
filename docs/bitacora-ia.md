@@ -63,6 +63,17 @@ Herramienta y modelo declarados en el registro previo: Claude (Anthropic), inter
 
 ---
 
+### Commits de implementación añadidos durante la intervención 4
+
+Además de los commits documentales enumerados arriba, esta rama incorpora:
+
+- Protección CSRF y requisito de secreto en producción: `app/__init__.py` — `fe977c13d082aaf29ec1c267997d9180276de2f3` (incluye también el middleware CSRF anterior en `a99d1ed463c92480a7cdedf2671f86bf20cb7ff3`).
+- Tokens ocultos en formularios: `app/templates/base.html` — `6407f9427a5e3f415a7e33827295c1c7d7a24196`; login — `48d6f4dab48fe0d23e7139358052c668b17bf4ff`; registro — `642ae855200d19c79a43bb44fe98a290de6c7763`; asignación — `ce0abd11daaf02f342f36754794dd8b8f27cc35f`; atención — `368dce24670666b9989bbfb13b9acc8e52fb8125`; validación — `837c44c8db09fa540a24504a4378278cfb9583eb`.
+- Pruebas CSRF: `tests/test_csrf.py` — `7a95089956da209c7005d4516bd329dd0316a13d`; configuración de fixtures — `1beeab3008d6559b567ec174a2cc96df4c27b4e7`; página HTTP 400 — `c597834872dd4610c78a13fa30a4c43bb851e99a`.
+- README de seguridad: `5d0830cafa448b5a3f1dbe1e1b34613cfa7aa919`; CI — `972c38a9806d40bbef7fc8952db1e212f69b0688`.
+
+**Estado de validación:** no se pudo ejecutar pytest desde el entorno de revisión porque no hubo conectividad de red para clonar el repositorio. No declarar los cambios probados hasta que GitHub Actions o una ejecución local real confirme el resultado.
+
 ## Pendientes humanos para cerrar la bitácora
 
 - Confirmar el modelo exacto de la herramienta usada en las intervenciones 1–3 y sus fechas.
