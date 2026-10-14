@@ -76,3 +76,51 @@ def test_produccion_exige_secret_key(monkeypatch, tmp_path):
     monkeypatch.delenv("SECRET_KEY", raising=False)
     with pytest.raises(RuntimeError, match="SECRET_KEY"):
         create_app({"DATABASE": str(tmp_path / "produccion.sqlite")})
+
+def test_registrar_incidencia_acepta_token_csrf_valido_con_sesion_autenticada(tmp_path):
+    """Una acción de negocio real debe aceptar un token de la sesión autenticada."""
+    from app.db import get_db
+
+    client = cliente_con_csrf(tmp_path)
+
+    # Login: el flujo limpia la sesión, así que obtenemos un token nuevo del
+    # formulario de registro dentro de la sesión ya autenticada.
+    token_login = token_de(client.get("/login").get_data(as_text=True))
+    login = client.post("/login", data={
+        "usuario": "solicitante1",
+        "contrasena": "Solicitante1*2026",
+        "csrf_token": token_login,
+    })
+    assert login.status_code == 302
+
+    pagina = client.get("/incidencias/nueva")
+    assert pagina.status_code == 200
+    token = token_de(pagina.get_data(as_text=True))
+
+    respuesta = client.post("/incidencias/", data={
+        "csrf_token": token,
+        "ubicacion": "LAB-01",
+        "categoria": "ELECTRICIDAD",
+        "descripcion": "La luminaria del laboratorio no enciende desde ayer.",
+        "impacto": "ALTO",
+        "riesgo_personas": "false",
+    })
+
+    assert respuesta.status_code == 302
+    assert respuesta.headers["Location"].endswith("/incidencias/mis-reportes")
+
+    with client.application.app_context():
+        db = get_db()
+        incidencia = db.execute(
+            "SELECT codigo, estado, prioridad FROM incidencias WHERE descripcion = ?",
+            ("La luminaria del laboratorio no enciende desde ayer.",),
+        ).fetchone()
+        assert incidencia is not None
+        assert incidencia["estado"] == "REGISTRADA"
+        assert incidencia["prioridad"] == "ALTA"
+        evento = db.execute(
+            "SELECT accion FROM eventos WHERE incidencia_id = (SELECT id FROM incidencias WHERE codigo = ?)",
+            (incidencia["codigo"],),
+        ).fetchone()
+        assert evento["accion"] == "REGISTRAR"
+
